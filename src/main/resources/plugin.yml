@@ -1,0 +1,5 @@
+name: LuaSpigot
+author: EngiN33R
+version: 1.0
+description: Utility library for terse and effective Lua binding
+main: net.engin33r.luaspigot.LuaSpigotBukkit
