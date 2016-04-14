@@ -11,8 +11,8 @@ import org.luaj.vm2.LuaValue;
  * Library for interacting with the chat.
  */
 @SuppressWarnings("unused")
-public class ChatBinding extends Library {
-    public ChatBinding() {
+public class ChatLibrary extends Library {
+    public ChatLibrary() {
         registerFunction(new BroadcastFunction());
     }
 

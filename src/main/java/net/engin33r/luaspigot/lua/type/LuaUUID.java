@@ -27,7 +27,7 @@ public class LuaUUID extends WeakType {
 
     @Override
     public String toLuaString() {
-        return "UUID: "+uuid.toString();
+        return uuid.toString();
     }
 
     public UUID getUUID() {
