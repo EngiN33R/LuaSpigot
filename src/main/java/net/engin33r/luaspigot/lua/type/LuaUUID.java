@@ -15,6 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LuaUUID extends WeakType {
     private final UUID uuid;
+    private static LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaUUID(String uuid) {
         this.uuid = UUID.fromString(uuid);
@@ -50,5 +51,10 @@ public class LuaUUID extends WeakType {
     public Varargs equals(Varargs arg) {
         LuaUUID uuid2 = (LuaUUID) arg.checktable(1);
         return LuaValue.valueOf(this.uuid.equals(uuid2.getUUID()));
+    }
+
+    @Override
+    protected LuaValue getMetatable() {
+        return typeMetatable;
     }
 }

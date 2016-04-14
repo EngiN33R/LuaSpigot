@@ -14,6 +14,7 @@ import org.luaj.vm2.Varargs;
  */
 public class LuaPlayer extends WeakType {
     private final OfflinePlayer p;
+    private static LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaPlayer(OfflinePlayer p) {
         super();
@@ -68,5 +69,10 @@ public class LuaPlayer extends WeakType {
         }
         p.teleport(loc);
         return NIL;
+    }
+
+    @Override
+    protected LuaValue getMetatable() {
+        return typeMetatable;
     }
 }

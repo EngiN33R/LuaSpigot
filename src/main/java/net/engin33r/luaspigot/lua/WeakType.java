@@ -20,11 +20,10 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public abstract class WeakType extends LuaTable implements IWeakType {
     private Map<LuaValue, DynamicField> fields = new HashMap<>();
-    private static LuaValue typeMetatable = LuaValue.tableOf();
 
     protected WeakType() {
         this.set("type", this.getName());
-        this.setmetatable(typeMetatable);
+        this.setmetatable(getMetatable());
 
         final Class<? extends WeakType> clazz = this.getClass();
         for (java.lang.reflect.Method m : clazz.getDeclaredMethods()) {
@@ -70,7 +69,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
 
             MetaMethodDef mtMethodAnn = m.getAnnotation(MetaMethodDef.class);
             if (mtMethodAnn != null) {
-                typeMetatable.set(mtMethodAnn.name(), new VarArgFunction() {
+                getMetatable().set(mtMethodAnn.name(), new VarArgFunction() {
                     @Override
                     public Varargs invoke(Varargs args) {
                         try {
@@ -94,9 +93,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
         return gettable(this, key);
     }
 
-    private LuaValue getMetatable() {
-        return typeMetatable;
-    }
+    protected abstract LuaValue getMetatable();
 
     public String toLuaString() {
         return this.tojstring();
@@ -128,6 +125,6 @@ public abstract class WeakType extends LuaTable implements IWeakType {
     }
 
     public void registerMetaMethod(String name, Function metamethod) {
-        typeMetatable.set(name, metamethod.getFunction());
+        getMetatable().set(name, metamethod.getFunction());
     }
 }
