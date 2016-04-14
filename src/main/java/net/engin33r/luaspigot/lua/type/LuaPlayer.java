@@ -24,6 +24,10 @@ public class LuaPlayer extends WeakType {
         registerField("uuid", new LuaUUID(p.getUniqueId()));
     }
 
+    public LuaPlayer(Player p) {
+        this((OfflinePlayer) p);
+    }
+
     @Override
     public String toLuaString() {
         return "player: "+p.getName()+" ("+p.getUniqueId()+")";
