@@ -45,7 +45,12 @@ public class SpigotGlobals {
         public Varargs invoke(Varargs arg) {
             if (arg.narg() == 0) return NIL;
 
-            Library lib = registry.get(arg.checkjstring(1));
+            String name = arg.checkjstring(1);
+            Library lib = registry.get(name);
+            if (lib == null) {
+                error("library not found: "+name);
+                return NIL;
+            }
             if (arg.narg() == 2)
                 env.set(arg.checkjstring(2), lib.getLibrary());
             else
