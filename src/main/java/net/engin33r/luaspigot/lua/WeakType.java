@@ -6,7 +6,6 @@ import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
-import org.luaj.vm2.lib.TwoArgFunction;
 import org.luaj.vm2.lib.VarArgFunction;
 
 import java.lang.reflect.InvocationTargetException;
@@ -21,10 +20,11 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public abstract class WeakType extends LuaTable implements IWeakType {
     private Map<LuaValue, DynamicField> fields = new HashMap<>();
-    private LuaValue typeMetatable = LuaValue.tableOf();
+    private static LuaValue typeMetatable = LuaValue.tableOf();
 
     protected WeakType() {
         this.set("type", this.getName());
+        this.setmetatable(typeMetatable);
 
         final Class<? extends WeakType> clazz = this.getClass();
         for (java.lang.reflect.Method m : clazz.getDeclaredMethods()) {
