@@ -1,7 +1,6 @@
 package net.engin33r.luaspigot.lua.type;
 
 import lombok.RequiredArgsConstructor;
-import net.engin33r.luaspigot.lua.Function;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.MetaMethodDef;
 import org.luaj.vm2.LuaValue;
@@ -19,18 +18,6 @@ public class LuaUUID extends WeakType {
 
     public LuaUUID(String uuid) {
         this.uuid = UUID.fromString(uuid);
-
-        registerMetaMethod("eq", new Function() {
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public Varargs call(Varargs args) {
-                return null;
-            }
-        });
     }
 
     @Override
