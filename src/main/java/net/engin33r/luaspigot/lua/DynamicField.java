@@ -13,5 +13,5 @@ public abstract class DynamicField<T extends WeakType> {
 
     public abstract String getName();
 
-    public abstract LuaValue update();
+    public abstract LuaValue query();
 }
