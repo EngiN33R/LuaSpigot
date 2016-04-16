@@ -22,6 +22,7 @@ public class LuaPlayer extends WeakType {
         this.p = p;
 
         registerField("uuid", new LuaUUID(p.getUniqueId()));
+        registerField("name", LuaValue.valueOf(p.getName()));
     }
 
     public LuaPlayer(Player p) {
@@ -45,11 +46,6 @@ public class LuaPlayer extends WeakType {
     @DynFieldDef(name = "online")
     public LuaValue getOnline() {
         return LuaValue.valueOf(this.p.isOnline());
-    }
-
-    @DynFieldDef(name = "name")
-    public LuaValue getPlayerName() {
-        return LuaValue.valueOf(this.p.getName());
     }
 
     @MethodDef(name = "message")
