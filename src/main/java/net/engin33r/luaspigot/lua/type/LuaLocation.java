@@ -2,8 +2,10 @@ package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.WeakType;
+import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import org.bukkit.Location;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Varargs;
 
 /**
  * Wrapper type describing a location in a world.
@@ -36,6 +38,11 @@ public class LuaLocation extends WeakType {
         return "location: ["+loc.getX()+","+loc.getY()+","+loc.getZ()+"]@" +
                 loc.getWorld().getName()+"@("+loc.getPitch()+"," +
                 loc.getYaw()+")";
+    }
+
+    @MethodDef(name = "getBlock")
+    public Varargs getBlock(Varargs args) {
+        return new LuaBlock(this.loc);
     }
 
     private class WorldField extends LinkedField<LuaLocation> {
