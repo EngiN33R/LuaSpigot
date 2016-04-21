@@ -480,6 +480,11 @@ public class EventLibrary extends Library {
         }
 
         @EventHandler(priority = EventPriority.LOW)
+        public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent ev) {
+            lib.callEvent("PlayerInteractAtEntity", ev);
+        }
+
+        @EventHandler(priority = EventPriority.LOW)
         public void onPlayerInteractEntity(PlayerInteractEntityEvent ev) {
             lib.callEvent("PlayerInteractEntity", ev);
         }
