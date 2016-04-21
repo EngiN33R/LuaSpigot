@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.luaj.vm2.LuaValue.NIL;
-import static org.luaj.vm2.LuaValue.error;
 
 /**
  * Abstract class representing a Lua library for scripts to use.
@@ -34,12 +33,14 @@ public abstract class Library implements ILibrary {
                     @Override
                     public Varargs call(Varargs args) {
                         try {
-                            return (LuaValue) m.invoke(Library.this, args);
-                        } catch (IllegalAccessException |
-                                InvocationTargetException e) {
-                            error(e.toString() + ": " +
-                                    String.valueOf(e.getMessage()));
+                            return (Varargs) m.invoke(Library.this, args);
+                        } catch (IllegalAccessException e) {
+                            /*error(e.toString() + ": " +
+                                    String.valueOf(e.getMessage()));*/
                             e.printStackTrace();
+                        } catch (InvocationTargetException e) {
+                            e.printStackTrace();
+                            e.getCause().printStackTrace();
                         }
                         return NIL;
                     }
