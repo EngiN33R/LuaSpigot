@@ -113,11 +113,6 @@ public class EventLibrary extends Library {
         }
 
         @EventHandler(priority = EventPriority.LOW)
-        public void onBlockPiston(BlockPistonEvent ev) {
-            lib.callEvent("BlockPiston", ev);
-        }
-
-        @EventHandler(priority = EventPriority.LOW)
         public void onBlockPistonExtend(BlockPistonExtendEvent ev) {
             lib.callEvent("BlockPistonExtend", ev);
         }
@@ -420,11 +415,6 @@ public class EventLibrary extends Library {
         }
 
         @EventHandler(priority = EventPriority.LOW)
-        public void onPlayerBucket(PlayerBucketEvent ev) {
-            lib.callEvent("PlayerBucket", ev);
-        }
-
-        @EventHandler(priority = EventPriority.LOW)
         public void onPlayerBucket(PlayerBucketEmptyEvent ev) {
             lib.callEvent("PlayerBucketEmpty", ev);
         }
@@ -706,11 +696,6 @@ public class EventLibrary extends Library {
             lib.callEvent("VehicleBlockCollision", ev);
         }
 
-        @EventHandler(priority = EventPriority.MONITOR)
-        public void onVehicleCollision(VehicleCollisionEvent ev) {
-            lib.callEvent("VehicleCollision", ev);
-        }
-
         @EventHandler(priority = EventPriority.LOW)
         public void onVehicleEntityCollision(VehicleEntityCollisionEvent ev) {
             lib.callEvent("VehicleEntityCollision", ev);
@@ -788,8 +773,11 @@ public class EventLibrary extends Library {
     }
 
     public void callEvent(String name, Event ev) {
-        Varargs result = call(VarargBuilder.build(LuaValue.valueOf(name),
-                new LuaEvent(ev)));
+        callEvent(name, new LuaEvent(ev));
+    }
+
+    public void callEvent(String name, LuaEvent ev) {
+        Varargs result = call(VarargBuilder.build(LuaValue.valueOf(name), ev));
         if (result.checkboolean(1)) {
             if (ev instanceof Cancellable) {
                 ((Cancellable) ev).setCancelled(true);
@@ -849,7 +837,9 @@ public class EventLibrary extends Library {
         Set<LuaFunction> set = handlers.get(eventName);
         if (set != null) {
             for (LuaFunction func : set) {
-                LuaBoolean res = (LuaBoolean) func.call(tbl);
+                LuaValue ret = func.call(tbl);
+                LuaBoolean res = ret.equals(NIL) ? LuaBoolean.FALSE :
+                        (LuaBoolean) ret;
                 if (res.equals(LuaBoolean.TRUE)) {
                     cancel = true;
                 }
