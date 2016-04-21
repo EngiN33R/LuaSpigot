@@ -11,7 +11,5 @@ import org.luaj.vm2.LuaValue;
 public abstract class DynamicField<T extends WeakType> {
     public final T self;
 
-    public abstract String getName();
-
     public abstract LuaValue query();
 }

@@ -33,11 +33,6 @@ public abstract class WeakType extends LuaTable implements IWeakType {
                 dynFields.put(LuaValue.valueOf(fieldAnn.name()),
                         new DynamicField<WeakType>(this) {
                             @Override
-                            public String getName() {
-                                return fieldAnn.name();
-                            }
-
-                            @Override
                             public LuaValue query() {
                                 try {
                                     return (LuaValue) m.invoke(WeakType.this);

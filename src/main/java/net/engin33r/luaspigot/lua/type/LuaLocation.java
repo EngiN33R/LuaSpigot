@@ -47,7 +47,6 @@ public class LuaLocation extends WeakType {
 
     private class WorldField extends LinkedField<LuaLocation> {
         public WorldField(LuaLocation self) { super(self); }
-        @Override public String getName() { return "x"; }
 
         @Override
         public void update(LuaValue val) {
@@ -65,7 +64,6 @@ public class LuaLocation extends WeakType {
 
     private class XField extends LinkedField<LuaLocation> {
         public XField(LuaLocation self) { super(self); }
-        @Override public String getName() { return "x"; }
 
         @Override
         public void update(LuaValue val) {
@@ -80,7 +78,6 @@ public class LuaLocation extends WeakType {
 
     private class YField extends LinkedField<LuaLocation> {
         public YField(LuaLocation self) { super(self); }
-        @Override public String getName() { return "y"; }
 
         @Override
         public void update(LuaValue val) {
@@ -95,7 +92,6 @@ public class LuaLocation extends WeakType {
 
     private class ZField extends LinkedField<LuaLocation> {
         public ZField(LuaLocation self) { super(self); }
-        @Override public String getName() { return "z"; }
 
         @Override
         public void update(LuaValue val) {
@@ -110,7 +106,6 @@ public class LuaLocation extends WeakType {
 
     private class PitchField extends LinkedField<LuaLocation> {
         public PitchField(LuaLocation self) { super(self); }
-        @Override public String getName() { return "pitch"; }
 
         @Override
         public void update(LuaValue val) {
@@ -125,7 +120,6 @@ public class LuaLocation extends WeakType {
 
     private class YawField extends LinkedField<LuaLocation> {
         public YawField(LuaLocation self) { super(self); }
-        @Override public String getName() { return "yaw"; }
 
         @Override
         public void update(LuaValue val) {
