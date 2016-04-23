@@ -24,6 +24,10 @@ public class LuaVector extends WeakType {
         this(new Vector(x, y, z));
     }
 
+    public Vector getVector() {
+        return this.vec;
+    }
+
     @Override
     protected LuaValue getMetatable() {
         return typeMetatable;

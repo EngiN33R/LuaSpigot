@@ -111,8 +111,8 @@ public abstract class WeakType extends LuaTable implements IWeakType {
         return this.toLuaString();
     }
 
-    public void registerMethod(Method method) {
-        this.set(method.getName(), method.getFunction());
+    public void registerMethod(String name, Method method) {
+        this.set(name, method.getFunction());
     }
 
     public void registerField(String name, LuaValue field) {

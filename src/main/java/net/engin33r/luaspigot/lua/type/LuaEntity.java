@@ -28,6 +28,10 @@ public class LuaEntity extends WeakType {
                 .toString() + ")";
     }
 
+    public Entity getEntity() {
+        return this.entity;
+    }
+
     @DynFieldDef(name = "name")
     public LuaValue getEName() {
         return LuaValue.valueOf(this.entity.getName());

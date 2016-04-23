@@ -99,7 +99,6 @@ public class LuaPlayer extends WeakType {
 
     private class InventoryField extends LinkedField<LuaPlayer> {
         public InventoryField(LuaPlayer self) { super(self); }
-        @Override public String getName() { return null; }
 
         @Override
         public void update(LuaValue val) {
