@@ -24,12 +24,7 @@ public abstract class Library implements ILibrary {
         for (java.lang.reflect.Method m : clazz.getDeclaredMethods()) {
             LibFunctionDef funcAnn = m.getAnnotation(LibFunctionDef.class);
             if (funcAnn != null) {
-                registerFunction(new Function() {
-                    @Override
-                    public String getName() {
-                        return funcAnn.name();
-                    }
-
+                registerFunction(funcAnn.name(), new Function() {
                     @Override
                     public Varargs call(Varargs args) {
                         try {
@@ -58,8 +53,7 @@ public abstract class Library implements ILibrary {
         return this.library;
     }
 
-    protected void registerFunction(Function f) {
-        String name = f.getName();
+    protected void registerFunction(String name, Function f) {
         library.set(name, f.getFunction());
         funcNameRegistry.put(name, f);
         System.out.println("Registered function " + name + " (" +
