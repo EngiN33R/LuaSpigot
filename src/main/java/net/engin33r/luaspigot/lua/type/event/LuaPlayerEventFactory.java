@@ -12,7 +12,7 @@ import org.luaj.vm2.*;
 import static org.luaj.vm2.LuaValue.NIL;
 
 public class LuaPlayerEventFactory {
-    public static LuaEvent build(PlayerEvent ev, LuaEvent lev) {
+    public static void build(PlayerEvent ev, LuaEvent lev) {
         LuaPlayer lpl = new LuaPlayer(ev.getPlayer());
         lev.registerField("player", lpl);
 
@@ -485,7 +485,5 @@ public class LuaPlayerEventFactory {
                 }
             });
         }
-
-        return lev;
     }
 }
