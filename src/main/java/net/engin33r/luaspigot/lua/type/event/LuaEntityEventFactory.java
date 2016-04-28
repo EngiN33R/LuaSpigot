@@ -81,8 +81,9 @@ public class LuaEntityEventFactory {
         }
 
         if (ev instanceof EntityDamageByBlockEvent) {
-            lev.registerField("damager", new LuaBlock(
-                    ((EntityDamageByBlockEvent) ev).getDamager()));
+            if (((EntityDamageByBlockEvent) ev).getDamager() != null)
+                lev.registerField("damager", new LuaBlock(
+                        ((EntityDamageByBlockEvent) ev).getDamager()));
         }
 
         if (ev instanceof EntityDamageByEntityEvent) {

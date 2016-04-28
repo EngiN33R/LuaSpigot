@@ -121,19 +121,21 @@ public class LuaBlockEventFactory {
         }
 
         if (ev instanceof BlockGrowEvent) {
-            lev.registerField("newstate", new LuaBlock(((BlockGrowEvent) ev)
+            lev.registerField("newState", new LuaBlock(((BlockGrowEvent) ev)
                     .getNewState()));
         }
 
         if (ev instanceof BlockIgniteEvent) {
             lev.registerField("cause", LuaString.valueOf(((BlockIgniteEvent) ev)
                     .getCause().toString()));
-            lev.registerField("igniteblock", new LuaBlock(
-                    ((BlockIgniteEvent) ev).getIgnitingBlock()));
+            if (((BlockIgniteEvent) ev).getIgnitingBlock() != null)
+                lev.registerField("igniteBlock", new LuaBlock(
+                        ((BlockIgniteEvent) ev).getIgnitingBlock()));
             lev.registerField("entity", new LuaEntity(((BlockIgniteEvent) ev)
                     .getIgnitingEntity()));
-            lev.registerField("player", new LuaPlayer(((BlockIgniteEvent) ev)
-                    .getPlayer()));
+            if (((BlockIgniteEvent) ev).getPlayer() != null)
+                lev.registerField("player", new LuaPlayer(
+                        ((BlockIgniteEvent) ev).getPlayer()));
         }
 
         if (ev instanceof BlockMultiPlaceEvent) {

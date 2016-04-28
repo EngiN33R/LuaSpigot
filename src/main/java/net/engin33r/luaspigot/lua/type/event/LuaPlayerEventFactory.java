@@ -441,9 +441,10 @@ public class LuaPlayerEventFactory {
             lev.registerField("stat", LuaString.valueOf(
                     ((PlayerStatisticIncrementEvent) ev).getStatistic()
                             .toString()));
-            lev.registerField("material", LuaString.valueOf(
-                    ((PlayerStatisticIncrementEvent) ev).getMaterial()
-                            .toString()));
+            if (((PlayerStatisticIncrementEvent) ev).getMaterial() != null)
+                lev.registerField("material", LuaString.valueOf(
+                        ((PlayerStatisticIncrementEvent) ev).getMaterial()
+                                .toString()));
             lev.registerField("new", LuaNumber.valueOf(
                     ((PlayerStatisticIncrementEvent) ev).getNewValue()));
             lev.registerField("previous", LuaNumber.valueOf(
