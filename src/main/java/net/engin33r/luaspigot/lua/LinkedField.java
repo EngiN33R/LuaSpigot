@@ -9,6 +9,7 @@ import org.luaj.vm2.LuaValue;
  */
 public abstract class LinkedField<T extends WeakType> extends DynamicField {
     public LinkedField(WeakType self) { super(self); }
+    public LinkedField() { super(null); } // Convenience
 
     public abstract void update(LuaValue val);
 
