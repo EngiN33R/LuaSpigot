@@ -1,0 +1,6 @@
+name: LuaSpigotCitizens
+author: EngiN33R
+version: 1.0
+description: LuaSpigot add-on for interaction with Citizens
+main: net.engin33r.luaspigot.citizens.LuaSpigotBukkit
+depend: [LuaSpigot]
