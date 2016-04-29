@@ -5,9 +5,13 @@ import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.Method;
 import net.engin33r.luaspigot.lua.type.*;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.*;
 import org.luaj.vm2.*;
+
+import java.net.InetAddress;
 
 import static org.luaj.vm2.LuaValue.NIL;
 
@@ -224,6 +228,53 @@ public class LuaPlayerEventFactory {
                             .toString()));
         }
 
+        if (ev instanceof PlayerInteractEvent) {
+            lev.registerField("action", LuaString.valueOf(
+                    ((PlayerInteractEvent) ev).getAction().toString()));
+            Block block = ((PlayerInteractEvent) ev).getClickedBlock();
+            if (block != null) {
+                lev.registerField("block", new LuaBlock(block));
+                lev.registerField("face", LuaString.valueOf(
+                        ((PlayerInteractEvent) ev).getBlockFace().toString()));
+            }
+            lev.registerField("item", new LuaItem(((PlayerInteractEvent) ev)
+                    .getItem()));
+
+            lev.registerField("hasBlock", LuaBoolean.valueOf(
+                    ((PlayerInteractEvent) ev).hasBlock()));
+            lev.registerField("hasItem", LuaBoolean.valueOf(
+                    ((PlayerInteractEvent) ev).hasItem()));
+            lev.registerField("blockPlaced", LuaBoolean.valueOf(
+                    ((PlayerInteractEvent) ev).isBlockInHand()));
+
+            lev.registerLinkedField("blockAction", new LinkedField<LuaEvent>() {
+                @Override
+                public void update(LuaValue val) {
+                    ((PlayerInteractEvent) ev).setUseInteractedBlock(
+                            Event.Result.valueOf(val.checkjstring()));
+                }
+
+                @Override
+                public LuaValue query() {
+                    return LuaString.valueOf(((PlayerInteractEvent) ev)
+                            .useInteractedBlock().toString());
+                }
+            });
+            lev.registerLinkedField("itemAction", new LinkedField<LuaEvent>() {
+                @Override
+                public void update(LuaValue val) {
+                    ((PlayerInteractEvent) ev).setUseItemInHand(
+                            Event.Result.valueOf(val.checkjstring()));
+                }
+
+                @Override
+                public LuaValue query() {
+                    return LuaString.valueOf(((PlayerInteractEvent) ev)
+                            .useItemInHand().toString());
+                }
+            });
+        }
+
         if (ev instanceof PlayerInteractAtEntityEvent) {
             lev.registerField("pos", new LuaVector(
                     ((PlayerInteractAtEntityEvent) ev).getClickedPosition()));
@@ -311,11 +362,14 @@ public class LuaPlayerEventFactory {
         }
 
         if (ev instanceof PlayerLoginEvent) {
-            lev.registerField("address", LuaString.valueOf(
-                    ((PlayerLoginEvent) ev).getAddress()
-                            .getCanonicalHostName()));
+            InetAddress addr = ((PlayerLoginEvent) ev).getAddress();
+            if (addr != null)
+                lev.registerField("address", LuaString.valueOf(addr
+                        .getCanonicalHostName()));
+
             lev.registerField("hostname", LuaString.valueOf(
                     ((PlayerLoginEvent) ev).getHostname()));
+
             lev.registerLinkedField("result", new LinkedField<LuaEvent>(lev) {
                 @Override
                 public void update(LuaValue val) {

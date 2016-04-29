@@ -773,6 +773,10 @@ public class EventLibrary extends Library {
                 plugin);
     }
 
+    public void reset() {
+        handlers.clear();
+    }
+
     public void registerListener(Listener listener) {
         Bukkit.getPluginManager().registerEvents(listener, plugin);
     }
