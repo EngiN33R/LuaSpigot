@@ -39,4 +39,8 @@ public class State {
     public void define(String name, LuaValue value) {
         env.set(name, value);
     }
+
+    public Globals getEnv() {
+        return this.env;
+    }
 }

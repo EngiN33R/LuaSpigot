@@ -38,7 +38,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
                                     return (LuaValue) m.invoke(WeakType.this);
                                 } catch (IllegalAccessException |
                                         InvocationTargetException e) {
-                                    error(e.getMessage());
+                                    //error(e.getMessage());
                                     e.printStackTrace();
                                 }
                                 return NIL;
@@ -55,7 +55,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
                             return (Varargs) m.invoke(WeakType.this, args);
                         } catch (IllegalAccessException |
                                 InvocationTargetException e) {
-                            error(e.getMessage());
+                            //error(e.getMessage());
                             e.printStackTrace();
                         }
                         return NIL;
@@ -72,7 +72,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
                             return (Varargs) m.invoke(WeakType.this, args);
                         } catch (IllegalAccessException |
                                 InvocationTargetException e) {
-                            error(e.getMessage());
+                            //error(e.getMessage());
                             e.printStackTrace();
                         }
                         return NIL;
@@ -103,7 +103,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
     protected abstract LuaValue getMetatable();
 
     public String toLuaString() {
-        return this.tojstring();
+        return super.tojstring();
     }
 
     @Override
