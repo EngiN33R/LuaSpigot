@@ -23,6 +23,7 @@ public class LuaBlock extends WeakType {
     public LuaBlock(Block block) {
         this.block = block;
         this.dynamic = true;
+        this.matCache = block.getType();
 
         registerField("dynamic", LuaBoolean.valueOf(true));
 
@@ -43,6 +44,7 @@ public class LuaBlock extends WeakType {
 
     public LuaBlock(BlockState state) {
         this.state = state;
+        this.matCache = state.getType();
 
         registerField("block", new LuaBlock(state.getBlock()));
         registerLinkedField("material", new MaterialField(this));
@@ -91,16 +93,17 @@ public class LuaBlock extends WeakType {
 
         @Override
         public LuaValue query() {
-            if (dynamic)
+            if (dynamic) {
                 if (!matCache.equals(block.getType())) {
                     matCache = block.getType();
                 }
-            else
+            } else {
                 if (!matCache.equals(state.getType())) {
                     matCache = state.getType();
                 }
+            }
 
-            return LuaValue.valueOf(matCache.name().toLowerCase());
+            return LuaString.valueOf(matCache.toString());
         }
     }
 }

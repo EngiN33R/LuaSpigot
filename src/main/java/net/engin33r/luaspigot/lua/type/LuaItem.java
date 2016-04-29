@@ -1,8 +1,11 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.WeakType;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.luaj.vm2.LuaNumber;
+import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaValue;
 
 /**
@@ -15,6 +18,10 @@ public class LuaItem extends WeakType {
 
     public LuaItem(ItemStack item) {
         this.item = item;
+
+        registerLinkedField("material", new MaterialField());
+        registerLinkedField("durability", new DurabilityField());
+        registerLinkedField("amount", new AmountField());
     }
 
     public LuaItem(String name) {
@@ -37,5 +44,41 @@ public class LuaItem extends WeakType {
     @Override
     public String getName() {
         return "item";
+    }
+
+    private class MaterialField extends LinkedField<LuaItem> {
+        @Override
+        public void update(LuaValue val) {
+            item.setType(Material.getMaterial(val.checkjstring()));
+        }
+
+        @Override
+        public LuaValue query() {
+            return LuaString.valueOf(item.getType().toString());
+        }
+    }
+
+    private class DurabilityField extends LinkedField<LuaItem> {
+        @Override
+        public void update(LuaValue val) {
+            item.setDurability(val.checknumber().toshort());
+        }
+
+        @Override
+        public LuaValue query() {
+            return LuaNumber.valueOf(item.getDurability());
+        }
+    }
+
+    private class AmountField extends LinkedField<LuaItem> {
+        @Override
+        public void update(LuaValue val) {
+            item.setAmount(val.checkint());
+        }
+
+        @Override
+        public LuaValue query() {
+            return LuaNumber.valueOf(item.getAmount());
+        }
     }
 }
