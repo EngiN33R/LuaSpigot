@@ -13,30 +13,31 @@ import static org.luaj.vm2.LuaValue.NIL;
 /**
  * Library for creating and managing Spigot async tasks.
  */
-public class AsyncLibrary extends Library {
+public class TaskLibrary extends Library {
     private final JavaPlugin plugin;
     private final BukkitScheduler scheduler;
 
-    public AsyncLibrary(JavaPlugin plugin) {
+    public TaskLibrary(JavaPlugin plugin) {
         this.plugin = plugin;
         this.scheduler = Bukkit.getScheduler();
     }
 
     @Override
     public String getName() {
-        return "async";
+        return "tasks";
     }
 
-    @LibFunctionDef(name = "create")
-    public Varargs create(Varargs args) {
+    @LibFunctionDef(name = "async")
+    public Varargs async(Varargs args) {
         LuaFunction run = args.checkfunction(1);
-        LuaFunction sync = args.optfunction(2, null);
-        scheduler.runTaskAsynchronously(plugin, () -> {
-            run.call();
-            if (sync != null) {
-                scheduler.runTask(plugin, sync::call);
-            }
-        });
+        scheduler.runTaskAsynchronously(plugin, run::call);
+        return NIL;
+    }
+
+    @LibFunctionDef(name = "sync")
+    public Varargs sync(Varargs args) {
+        LuaFunction run = args.checkfunction(1);
+        scheduler.runTask(plugin, run::call);
         return NIL;
     }
 }
