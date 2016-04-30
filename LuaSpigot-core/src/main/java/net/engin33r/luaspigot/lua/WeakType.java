@@ -120,7 +120,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
     }
 
     public void registerField(LuaValue key, LuaValue field) {
-        this.set(key, field);
+        this.set(key, field == null ? NIL : field);
     }
 
     public void registerDynamicField(String name, DynamicField field) {
