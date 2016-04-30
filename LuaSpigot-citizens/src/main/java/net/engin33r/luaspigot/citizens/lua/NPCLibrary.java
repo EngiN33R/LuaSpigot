@@ -6,6 +6,7 @@ import net.engin33r.luaspigot.lua.Library;
 import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
 import net.engin33r.luaspigot.lua.type.LuaUUID;
 import org.bukkit.entity.EntityType;
+import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.Varargs;
 
 /**
@@ -34,5 +35,14 @@ public class NPCLibrary extends Library {
     public Varargs getByUUID(Varargs args) {
         LuaUUID uuid = (LuaUUID) args.checktable(1);
         return new LuaNPC(registry.getByUniqueIdGlobal(uuid.getUUID()));
+    }
+
+    @LibFunctionDef(name = "list")
+    public Varargs list(Varargs args) {
+        LuaTable tbl = LuaTable.tableOf();
+        for (NPC npc : registry.sorted()) {
+            tbl.set(tbl.length()+1, new LuaNPC(npc));
+        }
+        return tbl;
     }
 }
