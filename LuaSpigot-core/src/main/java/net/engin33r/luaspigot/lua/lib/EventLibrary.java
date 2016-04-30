@@ -1,6 +1,6 @@
 package net.engin33r.luaspigot.lua.lib;
 
-import lombok.RequiredArgsConstructor;
+import net.engin33r.luaspigot.EventListener;
 import net.engin33r.luaspigot.lua.Library;
 import net.engin33r.luaspigot.lua.VarargBuilder;
 import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
@@ -17,10 +17,12 @@ import org.bukkit.event.server.*;
 import org.bukkit.event.vehicle.*;
 import org.bukkit.event.weather.*;
 import org.bukkit.event.world.*;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.luaj.vm2.*;
 
 import java.util.*;
+import java.util.logging.Level;
 
 import static org.luaj.vm2.LuaValue.NIL;
 
@@ -30,12 +32,14 @@ import static org.luaj.vm2.LuaValue.NIL;
 @SuppressWarnings("unused")
 public class EventLibrary extends Library {
     private final Map<String, Set<LuaFunction>> handlers = new HashMap<>();
-    private final JavaPlugin plugin;
+    private static Set<Class<? extends EventListener>> listeners =
+            new HashSet<>();
 
     /* HERE WE GO BOYS */
-    @RequiredArgsConstructor
-    private class InternalListener implements Listener {
-        private final EventLibrary lib;
+    private class InternalListener extends EventListener {
+        public InternalListener(EventLibrary lib) {
+            super(lib);
+        }
 
         @EventHandler(priority = EventPriority.MONITOR)
         public void onAsyncPlayerChat(AsyncPlayerChatEvent ev) {
@@ -768,17 +772,35 @@ public class EventLibrary extends Library {
     }
 
     public EventLibrary(JavaPlugin plugin) {
-        this.plugin = plugin;
-        Bukkit.getPluginManager().registerEvents(new InternalListener(this),
-                plugin);
+        PluginManager manager = Bukkit.getPluginManager();
+        manager.registerEvents(new InternalListener(this), plugin);
+        for (Class<? extends EventListener> l : listeners) {
+            try {
+                manager.registerEvents(l.getConstructor(EventLibrary.class)
+                        .newInstance(this), plugin);
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.WARNING, "Could not register " +
+                        l.getSimpleName(), e);
+            }
+        }
     }
 
     public void reset() {
         handlers.clear();
     }
 
-    public void registerListener(Listener listener) {
-        Bukkit.getPluginManager().registerEvents(listener, plugin);
+    public static void registerListener(Class<? extends EventListener>
+                                                listener) {
+        Bukkit.getPluginManager().getPlugin("LuaSpigot").getLogger()
+                .info("Added listener " + listener.getSimpleName());
+        listeners.add(listener);
+    }
+
+    public static void deregisterListener(Class<? extends EventListener>
+                                                  listener) {
+        Bukkit.getPluginManager().getPlugin("LuaSpigot").getLogger()
+                .info("Removed listener " + listener.getSimpleName());
+        listeners.remove(listener);
     }
 
     public void callEvent(String name, Event ev) {
