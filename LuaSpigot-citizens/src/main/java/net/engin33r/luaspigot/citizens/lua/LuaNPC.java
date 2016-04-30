@@ -15,9 +15,15 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.luaj.vm2.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class LuaNPC extends WeakType {
     private final NPC npc;
     private static LuaValue typeMetatable = LuaValue.tableOf();
+
+    private static Map<String, Class<? extends LuaNPCTrait>> traitAdapters =
+            new HashMap<>();
 
     public LuaNPC(NPC npc) {
         this.npc = npc;
@@ -29,12 +35,16 @@ public class LuaNPC extends WeakType {
         registerLinkedField("protected", new ProtectedField(this));
     }
 
+    public static void registerTraitAdapter(
+            String name, Class<? extends LuaNPCTrait> clazz) {
+        traitAdapters.put(name, clazz);
+    }
+
     @Override
     protected LuaValue getMetatable() {
         return typeMetatable;
     }
 
-    @Override
     public String getName() {
         return "npc";
     }
@@ -128,6 +138,24 @@ public class LuaNPC extends WeakType {
     public Varargs hasTrait(Varargs args) {
         return LuaBoolean.valueOf(npc.hasTrait(CitizensAPI.getTraitFactory()
                 .getTrait(args.checkjstring(1)).getClass()));
+    }
+
+    @MethodDef(name = "getTrait")
+    public Varargs getTrait(Varargs args) {
+        String name = args.checkjstring(1);
+
+        Class<? extends Trait> clazz = CitizensAPI.getTraitFactory()
+                .getTrait(name).getClass();
+        Trait trait = npc.getTrait(clazz);
+
+        try {
+            Class<? extends LuaNPCTrait> lclass = traitAdapters.get(name);
+            if (lclass == null) lclass = LuaNPCTrait.class;
+            return lclass.getConstructor(clazz).newInstance(trait);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return NIL;
     }
 
     private class NameField extends LinkedField<LuaNPC> {
