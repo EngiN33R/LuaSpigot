@@ -31,6 +31,8 @@ public class LuaEvent extends WeakType {
             registerLinkedField("cancelled", new CancelledField(this));
         }
 
+        registerField("async", LuaBoolean.valueOf(ev.isAsynchronous()));
+
         if (ev instanceof AsyncPlayerPreLoginEvent) {
             registerField("address", LuaString.valueOf(
                     ((AsyncPlayerPreLoginEvent) ev).getAddress()
