@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 import org.luaj.vm2.*;
 
 import java.net.InetAddress;
@@ -237,8 +238,8 @@ public class LuaPlayerEventFactory {
                 lev.registerField("face", LuaString.valueOf(
                         ((PlayerInteractEvent) ev).getBlockFace().toString()));
             }
-            lev.registerField("item", new LuaItem(((PlayerInteractEvent) ev)
-                    .getItem()));
+            ItemStack item = ((PlayerInteractEvent) ev).getItem();
+            if (item != null) lev.registerField("item", new LuaItem(item));
 
             lev.registerField("hasBlock", LuaBoolean.valueOf(
                     ((PlayerInteractEvent) ev).hasBlock()));
@@ -503,6 +504,35 @@ public class LuaPlayerEventFactory {
                     ((PlayerStatisticIncrementEvent) ev).getNewValue()));
             lev.registerField("previous", LuaNumber.valueOf(
                     ((PlayerStatisticIncrementEvent) ev).getNewValue()));
+        }
+
+        if (ev instanceof PlayerSwapHandItemsEvent) {
+            lev.registerLinkedField("main", new LinkedField<LuaEvent>() {
+                @Override
+                public void update(LuaValue val) {
+                    ((PlayerSwapHandItemsEvent) ev).setMainHandItem(
+                            ((LuaItem) val.checktable()).getItem());
+                }
+
+                @Override
+                public LuaValue query() {
+                    return new LuaItem(((PlayerSwapHandItemsEvent) ev)
+                            .getMainHandItem());
+                }
+            });
+            lev.registerLinkedField("offhand", new LinkedField<LuaEvent>() {
+                @Override
+                public void update(LuaValue val) {
+                    ((PlayerSwapHandItemsEvent) ev).setOffHandItem(
+                            ((LuaItem) val.checktable()).getItem());
+                }
+
+                @Override
+                public LuaValue query() {
+                    return new LuaItem(((PlayerSwapHandItemsEvent) ev)
+                            .getOffHandItem());
+                }
+            });
         }
 
         if (ev instanceof PlayerTeleportEvent) {

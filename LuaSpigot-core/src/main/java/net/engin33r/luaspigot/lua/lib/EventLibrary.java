@@ -581,6 +581,11 @@ public class EventLibrary extends Library {
         }
 
         @EventHandler(priority = EventPriority.LOW)
+        public void onPlayerSwapHandItems(PlayerSwapHandItemsEvent ev) {
+            lib.callEvent("PlayerSwapHandItems", ev);
+        }
+
+        @EventHandler(priority = EventPriority.LOW)
         public void onPlayerTeleport(PlayerTeleportEvent ev) {
             lib.callEvent("PlayerTeleport", ev);
         }
