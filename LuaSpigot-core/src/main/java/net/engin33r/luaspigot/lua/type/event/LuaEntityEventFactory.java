@@ -45,8 +45,8 @@ public class LuaEntityEventFactory {
         }
 
         if (ev instanceof EntityCombustByBlockEvent) {
-            lev.registerField("combuster", new LuaBlock(
-                    ((EntityCombustByBlockEvent) ev).getCombuster()));
+            Block block = ((EntityCombustByBlockEvent) ev).getCombuster();
+            if (block != null) lev.registerField("block", new LuaBlock(block));
         }
 
         if (ev instanceof EntityCombustByEntityEvent) {
