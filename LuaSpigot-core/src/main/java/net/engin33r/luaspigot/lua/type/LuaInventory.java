@@ -76,7 +76,7 @@ public class LuaInventory extends WeakType {
 
     @MethodDef(name = "set")
     public Varargs set(Varargs arg) {
-        TypeValidator.validate(arg.checktable(1), "item");
+        TypeValidator.validate(arg.checktable(2), "item");
         this.inv.setItem(arg.checkint(1), ((LuaItem) arg.checktable(2))
                 .getItem());
         return NIL;
