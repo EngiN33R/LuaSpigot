@@ -1,6 +1,7 @@
 package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.LinkedField;
+import net.engin33r.luaspigot.lua.TypeValidator;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import org.bukkit.Location;
@@ -48,6 +49,7 @@ public class LuaLocation extends WeakType {
 
     @MethodDef(name = "distance")
     public Varargs distance(Varargs args) {
+        TypeValidator.validate(args.checktable(1), "location");
         Location loc2 = ((LuaLocation) args.checktable(1)).getLocation();
         return LuaNumber.valueOf(loc.distance(loc2));
     }
@@ -57,6 +59,7 @@ public class LuaLocation extends WeakType {
 
         @Override
         public void update(LuaValue val) {
+            TypeValidator.validate(val.checktable(), "world");
             loc.setWorld(((LuaWorld) val.checktable()).getWorld());
         }
 

@@ -1,6 +1,7 @@
 package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.LinkedField;
+import net.engin33r.luaspigot.lua.TypeValidator;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
@@ -73,6 +74,7 @@ public class LuaEntity extends WeakType {
     private class LocationField extends LinkedField<LuaEntity> {
         @Override
         public void update(LuaValue val) {
+            TypeValidator.validate(val.checktable(), "location");
             entity.teleport(((LuaLocation) val.checktable()).getLocation());
         }
 

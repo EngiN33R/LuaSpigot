@@ -1,6 +1,7 @@
 package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.TableBuilder;
+import net.engin33r.luaspigot.lua.TypeValidator;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import org.bukkit.inventory.Inventory;
@@ -63,6 +64,7 @@ public class LuaInventory extends WeakType {
 
     @MethodDef(name = "add")
     public Varargs add(Varargs arg) {
+        TypeValidator.validate(arg.checktable(1), "item");
         Map<Integer, ItemStack> failed = this.inv.addItem(((LuaItem) arg
                 .checktable(1)).getItem());
         LuaTable tbl = LuaValue.tableOf();
@@ -74,6 +76,7 @@ public class LuaInventory extends WeakType {
 
     @MethodDef(name = "set")
     public Varargs set(Varargs arg) {
+        TypeValidator.validate(arg.checktable(1), "item");
         this.inv.setItem(arg.checkint(1), ((LuaItem) arg.checktable(2))
                 .getItem());
         return NIL;
@@ -86,7 +89,10 @@ public class LuaInventory extends WeakType {
         ItemStack[] contents = new ItemStack[size];
         for (int i = 1; i <= size; i++) {
             if (tbl.get(i).isnil()) contents[i-1] = null;
-            else contents[i-1] = ((LuaItem) tbl.get(i).checktable()).getItem();
+            else {
+                TypeValidator.validate(tbl.get(i).checktable(), "item");
+                contents[i-1] = ((LuaItem) tbl.get(i).checktable()).getItem();
+            }
         }
         this.inv.setContents(contents);
         return NIL;

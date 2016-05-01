@@ -1,6 +1,7 @@
 package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.LinkedField;
+import net.engin33r.luaspigot.lua.TypeValidator;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
@@ -9,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -78,9 +80,25 @@ public class LuaPlayer extends WeakType {
         Player p = this.p.getPlayer();
         if (p == null) return NIL;
 
-        Location loc;
         if (args.narg() == 1) {
-            loc = ((LuaLocation) args.checktable(1)).getLocation();
+            LuaTable tbl = args.checktable(1);
+            LuaValue ltype = tbl.get("type");
+            if (ltype == NIL) {
+                error("location or entity expected, got table");
+            } else {
+                String type = ltype.tojstring();
+                switch (type) {
+                    case "location":
+                        p.teleport(((LuaLocation) tbl).getLocation());
+                        break;
+                    case "entity":
+                        p.teleport(((LuaEntity) tbl).getEntity());
+                        break;
+                    default:
+                        error("location or entity expected, got " + type);
+                        break;
+                }
+            }
         } else if (args.narg() < 3) {
             error("not enough arguments");
             return NIL;
@@ -90,10 +108,9 @@ public class LuaPlayer extends WeakType {
             if (!wname.equals("")) {
                 w = Bukkit.getWorld(wname);
             }
-            loc = new Location(w, args.checkdouble(1), args.checkdouble(2),
-                    args.checkdouble(3));
+            p.teleport(new Location(w, args.checkdouble(1), args.checkdouble(2),
+                    args.checkdouble(3)));
         }
-        p.teleport(loc);
         return NIL;
     }
 
@@ -112,6 +129,7 @@ public class LuaPlayer extends WeakType {
             if (pp == null) return;
 
             LuaTable tbl = val.checktable(1);
+            TypeValidator.validate(tbl, "location");
             pp.teleport(((LuaLocation) tbl).getLocation());
         }
 
@@ -127,7 +145,9 @@ public class LuaPlayer extends WeakType {
             Player p = getPlayer().getPlayer();
             if (p == null) return;
 
-            p.getInventory().setContents(((LuaInventory) val).getContents());
+            TypeValidator.validate(val.checktable(), "inventory");
+            p.getInventory().setContents(((LuaInventory) val.checktable())
+                    .getContents());
         }
 
         @Override
