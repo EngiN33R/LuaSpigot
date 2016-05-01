@@ -51,10 +51,15 @@ public class SpigotGlobals {
                 error("library not found: "+name);
                 return NIL;
             }
-            if (arg.narg() == 2)
+            if (arg.narg() == 2) {
+                if (env.get(arg.checkjstring(2)) == lib.getLibrary())
+                    return NIL;
                 env.set(arg.checkjstring(2), lib.getLibrary());
-            else
+            } else {
+                if (env.get(lib.getName()) == lib.getLibrary())
+                    return NIL;
                 env.set(lib.getName(), lib.getLibrary());
+            }
 
             return NIL;
         }
