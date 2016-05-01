@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 
@@ -29,7 +30,8 @@ public class LuaPlayer extends WeakType {
         registerField("uuid", new LuaUUID(p.getUniqueId()));
         registerField("name", LuaValue.valueOf(p.getName()));
 
-        registerLinkedField("inventory", new InventoryField(this));
+        registerLinkedField("inventory", new InventoryField());
+        registerLinkedField("location", new LocationField());
 
         if (p.getPlayer() != null)
             inv = new LuaInventory(p.getPlayer().getInventory());
@@ -56,6 +58,12 @@ public class LuaPlayer extends WeakType {
     @DynFieldDef(name = "online")
     public LuaValue getOnline() {
         return LuaValue.valueOf(this.p.isOnline());
+    }
+
+    @DynFieldDef(name = "location")
+    public LuaValue getLocation() {
+        Player p = this.p.getPlayer();
+        return p == null ? NIL : new LuaLocation(p.getLocation());
     }
 
     @MethodDef(name = "message")
@@ -97,9 +105,23 @@ public class LuaPlayer extends WeakType {
         return new LuaInventory(p.getInventory());
     }
 
-    private class InventoryField extends LinkedField<LuaPlayer> {
-        public InventoryField(LuaPlayer self) { super(self); }
+    private class LocationField extends LinkedField<LuaPlayer> {
+        @Override
+        public void update(LuaValue val) {
+            Player pp = p.getPlayer();
+            if (pp == null) return;
 
+            LuaTable tbl = val.checktable(1);
+            pp.teleport(((LuaLocation) tbl).getLocation());
+        }
+
+        @Override
+        public LuaValue query() {
+            return null;
+        }
+    }
+
+    private class InventoryField extends LinkedField<LuaPlayer> {
         @Override
         public void update(LuaValue val) {
             Player p = getPlayer().getPlayer();

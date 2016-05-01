@@ -54,7 +54,8 @@ public class LuaItem extends WeakType {
 
         @Override
         public LuaValue query() {
-            return LuaString.valueOf(item.getType().toString());
+            return (item == null || item.getType() == null) ? NIL :
+                    LuaString.valueOf(item.getType().toString());
         }
     }
 

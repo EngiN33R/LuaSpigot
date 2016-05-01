@@ -1,5 +1,6 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.TableBuilder;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import org.bukkit.inventory.Inventory;
@@ -8,6 +9,7 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -52,6 +54,13 @@ public class LuaInventory extends WeakType {
         return new LuaItem(stack);
     }
 
+    @MethodDef(name = "getAll")
+    public Varargs getAll(Varargs arg) {
+        return TableBuilder.tableFrom(
+                Arrays.asList(this.inv.getStorageContents()),
+                i -> new LuaItem((ItemStack) i));
+    }
+
     @MethodDef(name = "add")
     public Varargs add(Varargs arg) {
         Map<Integer, ItemStack> failed = this.inv.addItem(((LuaItem) arg
@@ -76,9 +85,16 @@ public class LuaInventory extends WeakType {
         int size = tbl.length();
         ItemStack[] contents = new ItemStack[size];
         for (int i = 1; i <= size; i++) {
-            contents[i-1] = ((LuaItem) tbl.get(i).checktable()).getItem();
+            if (tbl.get(i).isnil()) contents[i-1] = null;
+            else contents[i-1] = ((LuaItem) tbl.get(i).checktable()).getItem();
         }
         this.inv.setContents(contents);
+        return NIL;
+    }
+
+    @MethodDef(name = "clear")
+    public Varargs clear(Varargs arg) {
+        this.inv.clear();
         return NIL;
     }
 }

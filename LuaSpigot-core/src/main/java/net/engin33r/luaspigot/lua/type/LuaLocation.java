@@ -4,6 +4,7 @@ import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import org.bukkit.Location;
+import org.luaj.vm2.LuaNumber;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 
@@ -43,6 +44,12 @@ public class LuaLocation extends WeakType {
     @MethodDef(name = "getBlock")
     public Varargs getBlock(Varargs args) {
         return new LuaBlock(this.loc);
+    }
+
+    @MethodDef(name = "distance")
+    public Varargs distance(Varargs args) {
+        Location loc2 = ((LuaLocation) args.checktable(1)).getLocation();
+        return LuaNumber.valueOf(loc.distance(loc2));
     }
 
     private class WorldField extends LinkedField<LuaLocation> {

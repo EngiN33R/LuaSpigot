@@ -1,5 +1,6 @@
 package net.engin33r.luaspigot.citizens.lua;
 
+import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.engin33r.luaspigot.lua.Library;
@@ -42,6 +43,17 @@ public class NPCLibrary extends Library {
         LuaTable tbl = LuaTable.tableOf();
         for (NPC npc : registry.sorted()) {
             tbl.set(tbl.length()+1, new LuaNPC(npc));
+        }
+        return tbl;
+    }
+
+    @LibFunctionDef(name = "withTrait")
+    public Varargs withTrait(Varargs args) {
+        LuaTable tbl = LuaTable.tableOf();
+        for (NPC npc : registry.sorted()) {
+            if (npc.hasTrait(CitizensAPI.getTraitFactory()
+                    .getTrait(args.checkjstring(1)).getClass()))
+                tbl.set(tbl.length()+1, new LuaNPC(npc));
         }
         return tbl;
     }
