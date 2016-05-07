@@ -30,12 +30,12 @@ public class LuaWorld extends WeakType {
         return this.world;
     }
 
-    @DynFieldDef(name = "name")
+    @DynFieldDef("name")
     public LuaValue getWName() {
         return LuaValue.valueOf(world.getName());
     }
 
-    @DynFieldDef(name = "uuid")
+    @DynFieldDef("uuid")
     public LuaValue getUUID() {
         return new LuaUUID(world.getUID());
     }

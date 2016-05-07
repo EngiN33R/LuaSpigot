@@ -30,7 +30,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
         for (java.lang.reflect.Method m : clazz.getDeclaredMethods()) {
             DynFieldDef fieldAnn = m.getAnnotation(DynFieldDef.class);
             if (fieldAnn != null) {
-                dynFields.put(LuaValue.valueOf(fieldAnn.name()),
+                dynFields.put(LuaValue.valueOf(fieldAnn.value()),
                         new DynamicField<WeakType>(this) {
                             @Override
                             public LuaValue query() {
@@ -48,7 +48,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
 
             MethodDef methodAnn = m.getAnnotation(MethodDef.class);
             if (methodAnn != null) {
-                registerField(methodAnn.name(), new VarArgFunction() {
+                registerField(methodAnn.value(), new VarArgFunction() {
                     @Override
                     public Varargs invoke(Varargs args) {
                         try {

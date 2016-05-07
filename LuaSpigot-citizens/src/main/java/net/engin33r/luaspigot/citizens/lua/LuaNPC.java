@@ -58,17 +58,17 @@ public class LuaNPC extends WeakType {
         return "npc: "+npc.getName()+" ("+npc.getUniqueId()+")";
     }
 
-    @DynFieldDef(name = "id")
+    @DynFieldDef("id")
     public LuaValue getID() {
         return LuaNumber.valueOf(this.npc.getId());
     }
 
-    @DynFieldDef(name = "entity")
+    @DynFieldDef("entity")
     public LuaValue getEntity() {
         return new LuaEntity(this.npc.getEntity());
     }
 
-    @DynFieldDef(name = "traits")
+    @DynFieldDef("traits")
     public LuaValue getTraits() {
         LuaTable traits = LuaTable.tableOf();
         for (Trait trait : npc.getTraits()) {
@@ -78,29 +78,29 @@ public class LuaNPC extends WeakType {
         return traits;
     }
 
-    @DynFieldDef(name = "spawned")
+    @DynFieldDef("spawned")
     public LuaValue getSpawned() {
         return LuaBoolean.valueOf(npc.isSpawned());
     }
 
-    @DynFieldDef(name = "lastLocation")
+    @DynFieldDef("lastLocation")
     public LuaValue getLastLocation() {
         return new LuaLocation(npc.getStoredLocation());
     }
 
-    @MethodDef(name = "spawn")
+    @MethodDef("spawn")
     public Varargs spawn(Varargs args) {
         return LuaBoolean.valueOf(npc.spawn(((LuaLocation) args.checktable(1))
                 .getLocation()));
     }
 
-    @MethodDef(name = "despawn")
+    @MethodDef("despawn")
     public Varargs despawn(Varargs args) {
         return LuaBoolean.valueOf(npc.despawn(DespawnReason.valueOf(
                 args.optjstring(1, "PLUGIN"))));
     }
 
-    @MethodDef(name = "teleport")
+    @MethodDef("teleport")
     public Varargs teleport(Varargs args) {
         npc.teleport(((LuaLocation) args.checktable(1)).getLocation(),
                 PlayerTeleportEvent.TeleportCause.valueOf(args.optjstring(2,
@@ -108,39 +108,39 @@ public class LuaNPC extends WeakType {
         return NIL;
     }
 
-    @MethodDef(name = "face")
+    @MethodDef("face")
     public Varargs face(Varargs args) {
         npc.faceLocation(((LuaLocation) args.checktable(1)).getLocation());
         return NIL;
     }
 
-    @MethodDef(name = "setEntityType")
+    @MethodDef("setEntityType")
     public Varargs setEntityType(Varargs args) {
         npc.setBukkitEntityType(EntityType.valueOf(args.checkjstring(1)));
         return NIL;
     }
 
-    @MethodDef(name = "addTrait")
+    @MethodDef("addTrait")
     public Varargs addTrait(Varargs args) {
         npc.addTrait(CitizensAPI.getTraitFactory().getTrait(args
                 .checkjstring(1)));
         return NIL;
     }
 
-    @MethodDef(name = "removeTrait")
+    @MethodDef("removeTrait")
     public Varargs removeTrait(Varargs args) {
         npc.removeTrait(CitizensAPI.getTraitFactory().getTrait(args
                 .checkjstring(1)).getClass());
         return NIL;
     }
 
-    @MethodDef(name = "hasTrait")
+    @MethodDef("hasTrait")
     public Varargs hasTrait(Varargs args) {
         return LuaBoolean.valueOf(npc.hasTrait(CitizensAPI.getTraitFactory()
                 .getTrait(args.checkjstring(1)).getClass()));
     }
 
-    @MethodDef(name = "getTrait")
+    @MethodDef("getTrait")
     public Varargs getTrait(Varargs args) {
         String name = args.checkjstring(1);
 

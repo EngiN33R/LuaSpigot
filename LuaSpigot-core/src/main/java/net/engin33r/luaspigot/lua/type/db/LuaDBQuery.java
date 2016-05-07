@@ -34,7 +34,7 @@ public class LuaDBQuery extends WeakType {
         return stmt.toString();
     }
 
-    @MethodDef(name = "setParameter")
+    @MethodDef("setParameter")
     public Varargs setParameter(Varargs args) {
         try {
             int param = args.checkint(1);
@@ -61,7 +61,7 @@ public class LuaDBQuery extends WeakType {
         return NIL;
     }
 
-    @MethodDef(name = "execute")
+    @MethodDef("execute")
     public Varargs execute(Varargs args) {
         try {
             LuaTable tbl = LuaTable.tableOf();

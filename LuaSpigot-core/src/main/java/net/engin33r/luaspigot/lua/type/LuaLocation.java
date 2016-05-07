@@ -42,12 +42,12 @@ public class LuaLocation extends WeakType {
                 loc.getYaw()+")";
     }
 
-    @MethodDef(name = "getBlock")
+    @MethodDef("getBlock")
     public Varargs getBlock(Varargs args) {
         return new LuaBlock(this.loc);
     }
 
-    @MethodDef(name = "distance")
+    @MethodDef("distance")
     public Varargs distance(Varargs args) {
         TypeValidator.validate(args.checktable(1), "location");
         Location loc2 = ((LuaLocation) args.checktable(1)).getLocation();

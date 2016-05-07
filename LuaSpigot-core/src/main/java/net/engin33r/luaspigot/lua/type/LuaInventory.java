@@ -48,21 +48,21 @@ public class LuaInventory extends WeakType {
         return "inventory";
     }
 
-    @MethodDef(name = "get")
+    @MethodDef("get")
     public Varargs get(Varargs arg) {
         ItemStack stack = this.inv.getItem(arg.checkint(1));
 
         return new LuaItem(stack);
     }
 
-    @MethodDef(name = "getAll")
+    @MethodDef("getAll")
     public Varargs getAll(Varargs arg) {
         return TableUtils.tableFrom(
                 Arrays.asList(this.inv.getStorageContents()),
                 i -> new LuaItem((ItemStack) i));
     }
 
-    @MethodDef(name = "add")
+    @MethodDef("add")
     public Varargs add(Varargs arg) {
         TypeValidator.validate(arg.checktable(1), "item");
         Map<Integer, ItemStack> failed = this.inv.addItem(((LuaItem) arg
@@ -74,7 +74,7 @@ public class LuaInventory extends WeakType {
         return tbl;
     }
 
-    @MethodDef(name = "set")
+    @MethodDef("set")
     public Varargs set(Varargs arg) {
         TypeValidator.validate(arg.checktable(2), "item");
         this.inv.setItem(arg.checkint(1), ((LuaItem) arg.checktable(2))
@@ -82,7 +82,7 @@ public class LuaInventory extends WeakType {
         return NIL;
     }
 
-    @MethodDef(name = "setAll")
+    @MethodDef("setAll")
     public Varargs setAll(Varargs arg) {
         LuaTable tbl = arg.checktable(1);
         int size = tbl.length();
@@ -98,7 +98,7 @@ public class LuaInventory extends WeakType {
         return NIL;
     }
 
-    @MethodDef(name = "clear")
+    @MethodDef("clear")
     public Varargs clear(Varargs arg) {
         this.inv.clear();
         return NIL;

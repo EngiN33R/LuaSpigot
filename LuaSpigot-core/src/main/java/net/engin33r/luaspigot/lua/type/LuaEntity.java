@@ -44,12 +44,12 @@ public class LuaEntity extends WeakType {
         return this.entity;
     }
 
-    @DynFieldDef(name = "name")
+    @DynFieldDef("name")
     public LuaValue getEName() {
         return LuaValue.valueOf(this.entity.getName());
     }
 
-    @MethodDef(name = "teleport")
+    @MethodDef("teleport")
     public Varargs teleport(Varargs args) {
         if (args.narg() == 1) {
             LuaTable tbl = args.checktable(1);

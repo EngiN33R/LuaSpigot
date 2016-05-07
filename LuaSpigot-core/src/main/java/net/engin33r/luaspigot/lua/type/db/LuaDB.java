@@ -31,7 +31,7 @@ public class LuaDB extends WeakType {
         return "database";
     }
 
-    @MethodDef(name = "prepare")
+    @MethodDef("prepare")
     public Varargs prepare(Varargs args) {
         try {
             PreparedStatement stmt = conn.prepareStatement(args
@@ -44,7 +44,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef(name = "begin")
+    @MethodDef("begin")
     public Varargs begin(Varargs args) {
         try {
             conn.setAutoCommit(false);
@@ -55,7 +55,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef(name = "execute")
+    @MethodDef("execute")
     public Varargs execute(Varargs args) {
         try {
             LuaTable tbl = LuaTable.tableOf();
@@ -103,7 +103,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef(name = "commit")
+    @MethodDef("commit")
     public Varargs commit(Varargs args) {
         try {
             conn.commit();
@@ -115,7 +115,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef(name = "rollback")
+    @MethodDef("rollback")
     public Varargs rollback(Varargs args) {
         try {
             conn.rollback();
@@ -127,7 +127,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef(name = "errors")
+    @MethodDef("errors")
     public Varargs errors(Varargs args) {
         try {
             LuaTable errs = LuaTable.tableOf();
@@ -145,7 +145,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef(name = "close")
+    @MethodDef("close")
     public Varargs close(Varargs args) {
         try {
             conn.close();

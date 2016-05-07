@@ -24,7 +24,7 @@ public class LuaColor extends WeakType {
         this.color = Color.fromRGB(r, g, b);
     }
 
-    @MethodDef(name = "mix")
+    @MethodDef("mix")
     public Varargs mix(Varargs args) {
         LuaTable tbl = args.checktable(1);
         if (TypeValidator.is(tbl, "color")) {

@@ -59,25 +59,25 @@ public class LuaPlayer extends WeakType {
         return this.p;
     }
 
-    @DynFieldDef(name = "online")
+    @DynFieldDef("online")
     public LuaValue getOnline() {
         return LuaValue.valueOf(this.p.isOnline());
     }
 
-    @DynFieldDef(name = "location")
+    @DynFieldDef("location")
     public LuaValue getLocation() {
         Player p = this.p.getPlayer();
         return p == null ? NIL : new LuaLocation(p.getLocation());
     }
 
-    @MethodDef(name = "message")
+    @MethodDef("message")
     public Varargs message(Varargs args) {
         Player p = this.p.getPlayer();
         if (p != null) p.sendMessage(args.checkjstring(1));
         return NIL;
     }
 
-    @MethodDef(name = "teleport")
+    @MethodDef("teleport")
     public Varargs teleport(Varargs args) {
         Player p = this.p.getPlayer();
         if (p == null) return NIL;
@@ -116,7 +116,7 @@ public class LuaPlayer extends WeakType {
         return NIL;
     }
 
-    @DynFieldDef(name = "inventory")
+    @DynFieldDef("inventory")
     public Varargs inventory() {
         Player p = this.p.getPlayer();
         if (p == null) return NIL;
