@@ -37,4 +37,29 @@ public class TypeValidator {
         return val.type() == LuaValue.TTABLE &&
                 val.get("type").tojstring().equals(type);
     }
+
+    // Anton Pavlovich #checkOf
+    public static boolean checkOf(LuaTable tbl, String type) {
+        for (int i = 1; i <= tbl.length(); i++) {
+            LuaTable val = tbl.get(i).checktable(i);
+            LuaValue ttype = val.get("type");
+            if (ttype == LuaValue.NIL) {
+                return false;
+            } else {
+                String vtype = ttype.tojstring();
+                if (!vtype.equals(type))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean strongCheckOf(LuaTable tbl, int type) {
+        for (int i = 1; i <= tbl.length(); i++) {
+            if (tbl.get(i).type() != type) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
