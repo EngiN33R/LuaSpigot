@@ -12,5 +12,5 @@ import static java.lang.annotation.ElementType.METHOD;
 @Target(value=METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MetaMethodDef {
-    String name();
+    String value();
 }

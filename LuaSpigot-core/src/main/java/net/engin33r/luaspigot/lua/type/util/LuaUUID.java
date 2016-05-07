@@ -1,8 +1,10 @@
-package net.engin33r.luaspigot.lua.type;
+package net.engin33r.luaspigot.lua.type.util;
 
 import lombok.RequiredArgsConstructor;
+import net.engin33r.luaspigot.lua.TypeValidator;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.MetaMethodDef;
+import org.luaj.vm2.LuaBoolean;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 
@@ -22,7 +24,7 @@ public class LuaUUID extends WeakType {
 
     @Override
     public String getName() {
-        return "UUID";
+        return "uuid";
     }
 
     @Override
@@ -34,10 +36,14 @@ public class LuaUUID extends WeakType {
         return this.uuid;
     }
 
-    @MetaMethodDef(name = "__eq")
+    @MetaMethodDef("__eq")
     public Varargs equals(Varargs arg) {
-        LuaUUID uuid2 = (LuaUUID) arg.checktable(1);
-        return LuaValue.valueOf(this.uuid.equals(uuid2.getUUID()));
+        TypeValidator.validate(arg.checktable(1), "uuid");
+        TypeValidator.validate(arg.checktable(2), "uuid");
+
+        LuaUUID uuid1 = (LuaUUID) arg.checktable(1);
+        LuaUUID uuid2 = (LuaUUID) arg.checktable(2);
+        return LuaBoolean.valueOf(uuid1.getUUID().equals(uuid2.getUUID()));
     }
 
     @Override
