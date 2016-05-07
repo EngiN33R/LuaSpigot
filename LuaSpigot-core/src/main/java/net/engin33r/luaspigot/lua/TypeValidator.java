@@ -17,4 +17,24 @@ public class TypeValidator {
                 LuaValue.error(type + " expected, got " + vtype);
         }
     }
+    public static void validateOf(LuaTable tbl, String type) {
+        for (int i = 1; i <= tbl.length(); i++) {
+            LuaTable val = tbl.get(i).checktable(i);
+            LuaValue ttype = val.get("type");
+            if (ttype == LuaValue.NIL) {
+                LuaValue.error("table of " + type + " expected, got errant" +
+                        " table");
+            } else {
+                String vtype = ttype.tojstring();
+                if (!vtype.equals(type))
+                    LuaValue.error("table of " + type + " expected, got" +
+                            " errant " + vtype);
+            }
+        }
+    }
+
+    public static boolean is(LuaValue val, String type) {
+        return val.type() == LuaValue.TTABLE &&
+                val.get("type").tojstring().equals(type);
+    }
 }
