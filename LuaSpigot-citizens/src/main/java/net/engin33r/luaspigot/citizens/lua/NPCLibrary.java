@@ -35,7 +35,7 @@ public class NPCLibrary extends Library {
     @LibFunctionDef(name = "fromUUID")
     public Varargs getByUUID(Varargs args) {
         LuaUUID uuid = (LuaUUID) args.checktable(1);
-        return new LuaNPC(registry.getByUniqueIdGlobal(uuid.getUUID()));
+        return new LuaNPC(registry.getByUniqueIdGlobal(uuid.getHandle()));
     }
 
     @LibFunctionDef(name = "list")
