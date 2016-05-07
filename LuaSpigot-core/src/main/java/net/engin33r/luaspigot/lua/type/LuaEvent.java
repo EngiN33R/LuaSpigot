@@ -1,5 +1,6 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.Method;
 import net.engin33r.luaspigot.lua.WeakType;
@@ -20,12 +21,11 @@ import org.luaj.vm2.*;
 /**
  * Wrapper type describing a Spigot event.
  */
-public class LuaEvent extends WeakType {
-    private final Event ev;
+public class LuaEvent extends WrapperType<Event> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaEvent(Event ev) {
-        this.ev = ev;
+        super(ev);
 
         if (ev instanceof Cancellable) {
             registerField("cancellable", TRUE);
@@ -100,7 +100,7 @@ public class LuaEvent extends WeakType {
                 @Override
                 public void update(LuaValue val) {
                     ((InventoryMoveItemEvent) ev).setItem(((LuaItem)
-                            val.checktable()).getItem());
+                            val.checktable()).getHandle());
                 }
 
                 @Override
@@ -154,11 +154,7 @@ public class LuaEvent extends WeakType {
 
     @Override
     public String toLuaString() {
-        return "event: "+ev.getEventName();
-    }
-
-    private Event getEvent() {
-        return this.ev;
+        return "event: " + getHandle().getEventName();
     }
 
     // 100% type-safety guarantee
@@ -167,12 +163,12 @@ public class LuaEvent extends WeakType {
 
         @Override
         public void update(LuaValue val) {
-            ((Cancellable) ev).setCancelled(val.checkboolean());
+            ((Cancellable) getHandle()).setCancelled(val.checkboolean());
         }
 
         @Override
         public LuaValue query() {
-            return LuaValue.valueOf(((Cancellable) ev).isCancelled());
+            return LuaValue.valueOf(((Cancellable) getHandle()).isCancelled());
         }
     }
 

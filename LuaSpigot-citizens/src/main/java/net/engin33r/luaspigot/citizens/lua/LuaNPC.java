@@ -5,7 +5,7 @@ import net.citizensnpcs.api.event.DespawnReason;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
 import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.WeakType;
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import net.engin33r.luaspigot.lua.type.LuaEntity;
@@ -18,15 +18,14 @@ import org.luaj.vm2.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LuaNPC extends WeakType {
-    private final NPC npc;
+public class LuaNPC extends WrapperType<NPC> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
     private static Map<String, Class<? extends LuaNPCTrait>> traitAdapters =
             new HashMap<>();
 
     public LuaNPC(NPC npc) {
-        this.npc = npc;
+        super(npc);
 
         registerField("uuid", new LuaUUID(npc.getUniqueId()));
         registerField("fullName", LuaString.valueOf(npc.getFullName()));
@@ -49,30 +48,26 @@ public class LuaNPC extends WeakType {
         return "npc";
     }
 
-    public NPC getNPC() {
-        return this.npc;
-    }
-
     @Override
     public String toLuaString() {
-        return "npc: "+npc.getName()+" ("+npc.getUniqueId()+")";
+        return "npc: " + getHandle().getName() + " (" + getHandle().getUniqueId() + ")";
     }
 
     @DynFieldDef("id")
     public LuaValue getID() {
-        return LuaNumber.valueOf(this.npc.getId());
+        return LuaNumber.valueOf(getHandle().getId());
     }
 
     @DynFieldDef("entity")
     public LuaValue getEntity() {
-        return new LuaEntity(this.npc.getEntity());
+        return new LuaEntity(getHandle().getEntity());
     }
 
     @DynFieldDef("traits")
     public LuaValue getTraits() {
         LuaTable traits = LuaTable.tableOf();
-        for (Trait trait : npc.getTraits()) {
-            traits.set(traits.length()+1, LuaString.valueOf(trait
+        for (Trait trait : getHandle().getTraits()) {
+            traits.set(traits.length() + 1, LuaString.valueOf(trait
                     .getName()));
         }
         return traits;
@@ -80,29 +75,29 @@ public class LuaNPC extends WeakType {
 
     @DynFieldDef("spawned")
     public LuaValue getSpawned() {
-        return LuaBoolean.valueOf(npc.isSpawned());
+        return LuaBoolean.valueOf(getHandle().isSpawned());
     }
 
     @DynFieldDef("lastLocation")
     public LuaValue getLastLocation() {
-        return new LuaLocation(npc.getStoredLocation());
+        return new LuaLocation(getHandle().getStoredLocation());
     }
 
     @MethodDef("spawn")
     public Varargs spawn(Varargs args) {
-        return LuaBoolean.valueOf(npc.spawn(((LuaLocation) args.checktable(1))
-                .getLocation()));
+        return LuaBoolean.valueOf(getHandle().spawn(((LuaLocation) args.checktable(1))
+                .getHandle()));
     }
 
     @MethodDef("despawn")
     public Varargs despawn(Varargs args) {
-        return LuaBoolean.valueOf(npc.despawn(DespawnReason.valueOf(
+        return LuaBoolean.valueOf(getHandle().despawn(DespawnReason.valueOf(
                 args.optjstring(1, "PLUGIN"))));
     }
 
     @MethodDef("teleport")
     public Varargs teleport(Varargs args) {
-        npc.teleport(((LuaLocation) args.checktable(1)).getLocation(),
+        getHandle().teleport(((LuaLocation) args.checktable(1)).getHandle(),
                 PlayerTeleportEvent.TeleportCause.valueOf(args.optjstring(2,
                         "PLUGIN")));
         return NIL;
@@ -110,33 +105,33 @@ public class LuaNPC extends WeakType {
 
     @MethodDef("face")
     public Varargs face(Varargs args) {
-        npc.faceLocation(((LuaLocation) args.checktable(1)).getLocation());
+        getHandle().faceLocation(((LuaLocation) args.checktable(1)).getHandle());
         return NIL;
     }
 
     @MethodDef("setEntityType")
     public Varargs setEntityType(Varargs args) {
-        npc.setBukkitEntityType(EntityType.valueOf(args.checkjstring(1)));
+        getHandle().setBukkitEntityType(EntityType.valueOf(args.checkjstring(1)));
         return NIL;
     }
 
     @MethodDef("addTrait")
     public Varargs addTrait(Varargs args) {
-        npc.addTrait(CitizensAPI.getTraitFactory().getTrait(args
+        getHandle().addTrait(CitizensAPI.getTraitFactory().getTrait(args
                 .checkjstring(1)));
         return NIL;
     }
 
     @MethodDef("removeTrait")
     public Varargs removeTrait(Varargs args) {
-        npc.removeTrait(CitizensAPI.getTraitFactory().getTrait(args
+        getHandle().removeTrait(CitizensAPI.getTraitFactory().getTrait(args
                 .checkjstring(1)).getClass());
         return NIL;
     }
 
     @MethodDef("hasTrait")
     public Varargs hasTrait(Varargs args) {
-        return LuaBoolean.valueOf(npc.hasTrait(CitizensAPI.getTraitFactory()
+        return LuaBoolean.valueOf(getHandle().hasTrait(CitizensAPI.getTraitFactory()
                 .getTrait(args.checkjstring(1)).getClass()));
     }
 
@@ -146,7 +141,7 @@ public class LuaNPC extends WeakType {
 
         Class<? extends Trait> clazz = CitizensAPI.getTraitFactory()
                 .getTrait(name).getClass();
-        Trait trait = npc.getTrait(clazz);
+        Trait trait = getHandle().getTrait(clazz);
 
         try {
             Class<? extends LuaNPCTrait> lclass = traitAdapters.get(name);
@@ -159,44 +154,50 @@ public class LuaNPC extends WeakType {
     }
 
     private class NameField extends LinkedField<LuaNPC> {
-        NameField(LuaNPC self) { super(self); }
+        NameField(LuaNPC self) {
+            super(self);
+        }
 
         @Override
         public void update(LuaValue val) {
-            npc.setName(val.tojstring());
+            getHandle().setName(val.tojstring());
         }
 
         @Override
         public LuaValue query() {
-            return LuaString.valueOf(npc.getName());
+            return LuaString.valueOf(getHandle().getName());
         }
     }
 
     private class FlyableField extends LinkedField<LuaNPC> {
-        FlyableField(LuaNPC self) { super(self); }
+        FlyableField(LuaNPC self) {
+            super(self);
+        }
 
         @Override
         public void update(LuaValue val) {
-            npc.setFlyable(val.checkboolean());
+            getHandle().setFlyable(val.checkboolean());
         }
 
         @Override
         public LuaValue query() {
-            return LuaBoolean.valueOf(npc.isFlyable());
+            return LuaBoolean.valueOf(getHandle().isFlyable());
         }
     }
 
     private class ProtectedField extends LinkedField<LuaNPC> {
-        ProtectedField(LuaNPC self) { super(self); }
+        ProtectedField(LuaNPC self) {
+            super(self);
+        }
 
         @Override
         public void update(LuaValue val) {
-            npc.setProtected(val.checkboolean());
+            getHandle().setProtected(val.checkboolean());
         }
 
         @Override
         public LuaValue query() {
-            return LuaBoolean.valueOf(npc.isProtected());
+            return LuaBoolean.valueOf(getHandle().isProtected());
         }
     }
 }

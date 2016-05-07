@@ -1,7 +1,7 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.WeakType;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.luaj.vm2.LuaNumber;
@@ -11,13 +11,11 @@ import org.luaj.vm2.LuaValue;
 /**
  * Wrapper type that represents an item stack.
  */
-public class LuaItem extends WeakType {
+public class LuaItem extends WrapperType<ItemStack> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
-    private ItemStack item;
-
     public LuaItem(ItemStack item) {
-        this.item = item;
+        super(item);
 
         registerLinkedField("material", new MaterialField());
         registerLinkedField("durability", new DurabilityField());
@@ -30,10 +28,6 @@ public class LuaItem extends WeakType {
 
     public LuaItem(String name, int n) {
         this(new ItemStack(Material.getMaterial(name.toUpperCase()), n));
-    }
-
-    public ItemStack getItem() {
-        return this.item;
     }
 
     @Override
@@ -49,11 +43,12 @@ public class LuaItem extends WeakType {
     private class MaterialField extends LinkedField<LuaItem> {
         @Override
         public void update(LuaValue val) {
-            item.setType(Material.getMaterial(val.checkjstring()));
+            getHandle().setType(Material.getMaterial(val.checkjstring()));
         }
 
         @Override
         public LuaValue query() {
+            ItemStack item = getHandle();
             return (item == null || item.getType() == null) ? NIL :
                     LuaString.valueOf(item.getType().toString());
         }
@@ -62,24 +57,24 @@ public class LuaItem extends WeakType {
     private class DurabilityField extends LinkedField<LuaItem> {
         @Override
         public void update(LuaValue val) {
-            item.setDurability(val.checknumber().toshort());
+            getHandle().setDurability(val.checknumber().toshort());
         }
 
         @Override
         public LuaValue query() {
-            return LuaNumber.valueOf(item.getDurability());
+            return LuaNumber.valueOf(getHandle().getDurability());
         }
     }
 
     private class AmountField extends LinkedField<LuaItem> {
         @Override
         public void update(LuaValue val) {
-            item.setAmount(val.checkint());
+            getHandle().setAmount(val.checkint());
         }
 
         @Override
         public LuaValue query() {
-            return LuaNumber.valueOf(item.getAmount());
+            return LuaNumber.valueOf(getHandle().getAmount());
         }
     }
 }

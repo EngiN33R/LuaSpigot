@@ -27,6 +27,6 @@ public class PlayerLibrary extends Library {
     @LibFunctionDef(name = "getByUUID")
     public Varargs getByUUID(Varargs args) {
         return new LuaPlayer(Bukkit.getOfflinePlayer(
-                new LuaUUID(args.checkjstring(1)).getUUID()));
+                new LuaUUID(args.checkjstring(1)).getHandle()));
     }
 }

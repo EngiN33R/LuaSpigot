@@ -1,8 +1,8 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.Method;
-import net.engin33r.luaspigot.lua.WeakType;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -12,16 +12,16 @@ import org.luaj.vm2.*;
 /**
  * Wrapper type representing a single block within the world.
  */
-public class LuaBlock extends WeakType {
+public class LuaBlock extends WrapperType<Block> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
-    private Block block;
     private BlockState state;
     private boolean dynamic = false;
     private Material matCache;
 
     public LuaBlock(Block block) {
-        this.block = block;
+        super(block);
+
         this.dynamic = true;
         this.matCache = block.getType();
 
@@ -43,6 +43,8 @@ public class LuaBlock extends WeakType {
     }
 
     public LuaBlock(BlockState state) {
+        super(null);
+
         this.state = state;
         this.matCache = state.getType();
 
@@ -86,7 +88,7 @@ public class LuaBlock extends WeakType {
         public void update(LuaValue val) {
             matCache = Material.getMaterial(val.checkjstring());
             if (dynamic)
-                block.setType(matCache);
+                getHandle().setType(matCache);
             else
                 state.setType(matCache);
         }
@@ -94,8 +96,8 @@ public class LuaBlock extends WeakType {
         @Override
         public LuaValue query() {
             if (dynamic) {
-                if (!matCache.equals(block.getType())) {
-                    matCache = block.getType();
+                if (!matCache.equals(getHandle().getType())) {
+                    matCache = getHandle().getType();
                 }
             } else {
                 if (!matCache.equals(state.getType())) {

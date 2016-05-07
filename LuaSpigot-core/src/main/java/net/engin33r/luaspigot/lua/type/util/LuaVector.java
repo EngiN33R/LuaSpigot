@@ -1,23 +1,22 @@
 package net.engin33r.luaspigot.lua.type.util;
 
 import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.WeakType;
+import net.engin33r.luaspigot.lua.WrapperType;
 import org.bukkit.util.Vector;
 import org.luaj.vm2.LuaValue;
 
 /**
  * Utility type describing a vector.
  */
-public class LuaVector extends WeakType {
-    private Vector vec;
+public class LuaVector extends WrapperType<Vector> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaVector(Vector vec) {
-        this.vec = vec;
+        super(vec);
 
-        registerLinkedField("x", new LuaVector.XField(this));
-        registerLinkedField("y", new LuaVector.YField(this));
-        registerLinkedField("z", new LuaVector.ZField(this));
+        registerLinkedField("x", new LuaVector.XField());
+        registerLinkedField("y", new LuaVector.YField());
+        registerLinkedField("z", new LuaVector.ZField());
     }
 
     public LuaVector(double x, double y, double z) {
@@ -25,7 +24,7 @@ public class LuaVector extends WeakType {
     }
 
     public Vector getVector() {
-        return this.vec;
+        return getHandle();
     }
 
     @Override
@@ -39,44 +38,38 @@ public class LuaVector extends WeakType {
     }
 
     private class XField extends LinkedField<LuaVector> {
-        public XField(LuaVector self) { super(self); }
-
         @Override
         public void update(LuaValue val) {
-            vec.setX(val.checkdouble());
+            getHandle().setX(val.checkdouble());
         }
 
         @Override
         public LuaValue query() {
-            return LuaValue.valueOf(LuaVector.this.vec.getX());
+            return LuaValue.valueOf(getHandle().getX());
         }
     }
 
     private class YField extends LinkedField<LuaVector> {
-        public YField(LuaVector self) { super(self); }
-
         @Override
         public void update(LuaValue val) {
-            vec.setY(val.checkdouble());
+            getHandle().setY(val.checkdouble());
         }
 
         @Override
         public LuaValue query() {
-            return LuaValue.valueOf(LuaVector.this.vec.getY());
+            return LuaValue.valueOf(getHandle().getY());
         }
     }
 
     private class ZField extends LinkedField<LuaVector> {
-        public ZField(LuaVector self) { super(self); }
-
         @Override
         public void update(LuaValue val) {
-            vec.setZ(val.checkdouble());
+            getHandle().setZ(val.checkdouble());
         }
 
         @Override
         public LuaValue query() {
-            return LuaValue.valueOf(LuaVector.this.vec.getZ());
+            return LuaValue.valueOf(getHandle().getZ());
         }
     }
 }

@@ -97,7 +97,7 @@ public class LuaPlayerEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((PlayerBucketEvent) ev).setItemStack(((LuaItem)
-                            val.checktable()).getItem());
+                            val.checktable()).getHandle());
                 }
 
                 @Override
@@ -150,7 +150,7 @@ public class LuaPlayerEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     OfflinePlayer pl = ((LuaPlayer) val.checktable())
-                            .getPlayer();
+                            .getHandle();
                     if (pl.getPlayer() == null) return;
 
                     ((PlayerCommandPreprocessEvent) ev).setPlayer(pl
@@ -299,7 +299,7 @@ public class LuaPlayerEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((PlayerItemConsumeEvent) ev).setItem(
-                            ((LuaItem) val.checktable()).getItem());
+                            ((LuaItem) val.checktable()).getHandle());
                 }
 
                 @Override
@@ -424,7 +424,7 @@ public class LuaPlayerEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((PlayerMoveEvent) ev).setFrom(((LuaLocation) val
-                            .checktable()).getLocation());
+                            .checktable()).getHandle());
                 }
 
                 @Override
@@ -436,7 +436,7 @@ public class LuaPlayerEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((PlayerMoveEvent) ev).setTo(((LuaLocation) val
-                            .checktable()).getLocation());
+                            .checktable()).getHandle());
                 }
 
                 @Override
@@ -477,7 +477,7 @@ public class LuaPlayerEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((PlayerRespawnEvent) ev).setRespawnLocation(
-                            ((LuaLocation) val.checktable()).getLocation());
+                            ((LuaLocation) val.checktable()).getHandle());
                 }
 
                 @Override
@@ -514,7 +514,7 @@ public class LuaPlayerEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((PlayerSwapHandItemsEvent) ev).setMainHandItem(
-                            ((LuaItem) val.checktable()).getItem());
+                            ((LuaItem) val.checktable()).getHandle());
                 }
 
                 @Override
@@ -527,7 +527,7 @@ public class LuaPlayerEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((PlayerSwapHandItemsEvent) ev).setOffHandItem(
-                            ((LuaItem) val.checktable()).getItem());
+                            ((LuaItem) val.checktable()).getHandle());
                 }
 
                 @Override

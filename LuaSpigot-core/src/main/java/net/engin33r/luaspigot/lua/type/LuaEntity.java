@@ -1,8 +1,8 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import net.engin33r.luaspigot.lua.type.util.LuaVector;
@@ -17,13 +17,11 @@ import org.luaj.vm2.Varargs;
 /**
  * Wrapper type describing an Entity.
  */
-public class LuaEntity extends WeakType {
+public class LuaEntity extends WrapperType<Entity> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
-    private final Entity entity;
-
     public LuaEntity(Entity entity) {
-        this.entity = entity;
+        super(entity);
 
         registerLinkedField("location", new LocationField());
         registerLinkedField("velocity", new VelocityField());
@@ -36,17 +34,13 @@ public class LuaEntity extends WeakType {
 
     @Override
     public String toLuaString() {
-        return "entity: " + entity.getName() + " (" + entity.getUniqueId()
-                .toString() + ")";
-    }
-
-    public Entity getEntity() {
-        return this.entity;
+        return "entity: " + getHandle().getName() + " ("
+                + getHandle().getUniqueId().toString() + ")";
     }
 
     @DynFieldDef("name")
     public LuaValue getEName() {
-        return LuaValue.valueOf(this.entity.getName());
+        return LuaValue.valueOf(getHandle().getName());
     }
 
     @MethodDef("teleport")
@@ -54,20 +48,20 @@ public class LuaEntity extends WeakType {
         if (args.narg() == 1) {
             LuaTable tbl = args.checktable(1);
             if (tbl.get("type").tojstring().equals("entity")) {
-                entity.teleport(((LuaEntity) tbl).getEntity());
+                getHandle().teleport(((LuaEntity) tbl).getHandle());
             } else if (tbl.get("type").tojstring().equals("location")) {
-                entity.teleport(((LuaLocation) tbl).getLocation());
+                getHandle().teleport(((LuaLocation) tbl).getHandle());
             }
         } else if (args.narg() < 3) {
             error("not enough arguments");
             return NIL;
         } else {
-            World w = entity.getWorld();
+            World w = getHandle().getWorld();
             String wname = args.optjstring(4, "");
             if (!wname.equals("")) {
                 w = Bukkit.getWorld(wname);
             }
-            entity.teleport(new Location(w, args.checkdouble(1),
+            getHandle().teleport(new Location(w, args.checkdouble(1),
                     args.checkdouble(2), args.checkdouble(3)));
         }
         return NIL;
@@ -77,12 +71,12 @@ public class LuaEntity extends WeakType {
         @Override
         public void update(LuaValue val) {
             TypeValidator.validate(val.checktable(), "location");
-            entity.teleport(((LuaLocation) val.checktable()).getLocation());
+            getHandle().teleport(((LuaLocation) val.checktable()).getHandle());
         }
 
         @Override
         public LuaValue query() {
-            return new LuaLocation(entity.getLocation());
+            return new LuaLocation(getHandle().getLocation());
         }
     }
 
@@ -96,12 +90,12 @@ public class LuaEntity extends WeakType {
             else
                 vec = new LuaVector(tbl.get(1).checkdouble(),
                         tbl.get(2).checkdouble(), tbl.get(3).checkdouble());
-            entity.setVelocity(vec.getVector());
+            getHandle().setVelocity(vec.getVector());
         }
 
         @Override
         public LuaValue query() {
-            return new LuaVector(entity.getVelocity());
+            return new LuaVector(getHandle().getVelocity());
         }
     }
 

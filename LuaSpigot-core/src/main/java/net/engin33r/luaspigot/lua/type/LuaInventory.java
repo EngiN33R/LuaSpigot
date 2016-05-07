@@ -1,8 +1,8 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.TableUtils;
 import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -16,13 +16,11 @@ import java.util.Map;
 /**
  * Wrapper type describing an inventory (chests, players etc.)
  */
-public class LuaInventory extends WeakType {
+public class LuaInventory extends WrapperType<Inventory> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
-    private Inventory inv;
-
     public LuaInventory(Inventory inv) {
-        this.inv = inv;
+        super(inv);
 
         registerField("title", LuaValue.valueOf(inv.getTitle()));
         registerField("name", LuaValue.valueOf(inv.getName()));
@@ -35,12 +33,8 @@ public class LuaInventory extends WeakType {
         return typeMetatable;
     }
 
-    public Inventory getInventory() {
-        return this.inv;
-    }
-
     public ItemStack[] getContents() {
-        return this.inv.getContents();
+        return getHandle().getContents();
     }
 
     @Override
@@ -50,7 +44,7 @@ public class LuaInventory extends WeakType {
 
     @MethodDef("get")
     public Varargs get(Varargs arg) {
-        ItemStack stack = this.inv.getItem(arg.checkint(1));
+        ItemStack stack = getHandle().getItem(arg.checkint(1));
 
         return new LuaItem(stack);
     }
@@ -58,15 +52,15 @@ public class LuaInventory extends WeakType {
     @MethodDef("getAll")
     public Varargs getAll(Varargs arg) {
         return TableUtils.tableFrom(
-                Arrays.asList(this.inv.getStorageContents()),
+                Arrays.asList(getHandle().getStorageContents()),
                 i -> new LuaItem((ItemStack) i));
     }
 
     @MethodDef("add")
     public Varargs add(Varargs arg) {
         TypeValidator.validate(arg.checktable(1), "item");
-        Map<Integer, ItemStack> failed = this.inv.addItem(((LuaItem) arg
-                .checktable(1)).getItem());
+        Map<Integer, ItemStack> failed = getHandle().addItem(((LuaItem) arg
+                .checktable(1)).getHandle());
         LuaTable tbl = LuaValue.tableOf();
         for (Integer key : failed.keySet()) {
             tbl.set(LuaValue.valueOf(key), new LuaItem(failed.get(key)));
@@ -77,8 +71,8 @@ public class LuaInventory extends WeakType {
     @MethodDef("set")
     public Varargs set(Varargs arg) {
         TypeValidator.validate(arg.checktable(2), "item");
-        this.inv.setItem(arg.checkint(1), ((LuaItem) arg.checktable(2))
-                .getItem());
+        getHandle().setItem(arg.checkint(1), ((LuaItem) arg.checktable(2))
+                .getHandle());
         return NIL;
     }
 
@@ -91,16 +85,16 @@ public class LuaInventory extends WeakType {
             if (tbl.get(i).isnil()) contents[i-1] = null;
             else {
                 TypeValidator.validate(tbl.get(i).checktable(), "item");
-                contents[i-1] = ((LuaItem) tbl.get(i).checktable()).getItem();
+                contents[i-1] = ((LuaItem) tbl.get(i).checktable()).getHandle();
             }
         }
-        this.inv.setContents(contents);
+        getHandle().setContents(contents);
         return NIL;
     }
 
     @MethodDef("clear")
     public Varargs clear(Varargs arg) {
-        this.inv.clear();
+        getHandle().clear();
         return NIL;
     }
 }

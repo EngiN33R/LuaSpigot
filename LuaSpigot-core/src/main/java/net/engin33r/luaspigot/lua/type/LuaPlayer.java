@@ -1,8 +1,8 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import net.engin33r.luaspigot.lua.type.util.LuaUUID;
@@ -19,16 +19,13 @@ import org.luaj.vm2.Varargs;
 /**
  * Wrapper type describing a player on (or off) the server.
  */
-public class LuaPlayer extends WeakType {
-    private final OfflinePlayer p;
+public class LuaPlayer extends WrapperType<OfflinePlayer> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
     private LuaInventory inv;
 
     public LuaPlayer(OfflinePlayer p) {
-        super();
-
-        this.p = p;
+        super(p);
 
         registerField("uuid", new LuaUUID(p.getUniqueId()));
         registerField("name", LuaValue.valueOf(p.getName()));
@@ -47,6 +44,7 @@ public class LuaPlayer extends WeakType {
 
     @Override
     public String toLuaString() {
+        OfflinePlayer p = getHandle();
         return "player: "+p.getName()+" ("+p.getUniqueId()+")";
     }
 
@@ -55,31 +53,27 @@ public class LuaPlayer extends WeakType {
         return "player";
     }
 
-    public OfflinePlayer getPlayer() {
-        return this.p;
-    }
-
     @DynFieldDef("online")
     public LuaValue getOnline() {
-        return LuaValue.valueOf(this.p.isOnline());
+        return LuaValue.valueOf(getHandle().isOnline());
     }
 
     @DynFieldDef("location")
     public LuaValue getLocation() {
-        Player p = this.p.getPlayer();
+        Player p = getHandle().getPlayer();
         return p == null ? NIL : new LuaLocation(p.getLocation());
     }
 
     @MethodDef("message")
     public Varargs message(Varargs args) {
-        Player p = this.p.getPlayer();
+        Player p = getHandle().getPlayer();
         if (p != null) p.sendMessage(args.checkjstring(1));
         return NIL;
     }
 
     @MethodDef("teleport")
     public Varargs teleport(Varargs args) {
-        Player p = this.p.getPlayer();
+        Player p = getHandle().getPlayer();
         if (p == null) return NIL;
 
         if (args.narg() == 1) {
@@ -91,10 +85,10 @@ public class LuaPlayer extends WeakType {
                 String type = ltype.tojstring();
                 switch (type) {
                     case "location":
-                        p.teleport(((LuaLocation) tbl).getLocation());
+                        p.teleport(((LuaLocation) tbl).getHandle());
                         break;
                     case "entity":
-                        p.teleport(((LuaEntity) tbl).getEntity());
+                        p.teleport(((LuaEntity) tbl).getHandle());
                         break;
                     default:
                         error("location or entity expected, got " + type);
@@ -118,7 +112,7 @@ public class LuaPlayer extends WeakType {
 
     @DynFieldDef("inventory")
     public Varargs inventory() {
-        Player p = this.p.getPlayer();
+        Player p = getHandle().getPlayer();
         if (p == null) return NIL;
 
         return new LuaInventory(p.getInventory());
@@ -127,12 +121,12 @@ public class LuaPlayer extends WeakType {
     private class LocationField extends LinkedField<LuaPlayer> {
         @Override
         public void update(LuaValue val) {
-            Player pp = p.getPlayer();
+            Player pp = getHandle().getPlayer();
             if (pp == null) return;
 
             LuaTable tbl = val.checktable(1);
             TypeValidator.validate(tbl, "location");
-            pp.teleport(((LuaLocation) tbl).getLocation());
+            pp.teleport(((LuaLocation) tbl).getHandle());
         }
 
         @Override
@@ -144,7 +138,7 @@ public class LuaPlayer extends WeakType {
     private class InventoryField extends LinkedField<LuaPlayer> {
         @Override
         public void update(LuaValue val) {
-            Player p = getPlayer().getPlayer();
+            Player p = getHandle().getPlayer();
             if (p == null) return;
 
             TypeValidator.validate(val.checktable(), "inventory");
@@ -154,10 +148,10 @@ public class LuaPlayer extends WeakType {
 
         @Override
         public LuaValue query() {
-            Player p = getPlayer().getPlayer();
+            Player p = getHandle().getPlayer();
             if (p == null) return NIL;
 
-            if (!inv.getInventory().equals(p.getInventory()))
+            if (!inv.getHandle().equals(p.getInventory()))
                 inv = new LuaInventory(p.getInventory());
 
             return inv;
@@ -167,7 +161,7 @@ public class LuaPlayer extends WeakType {
     private class VelocityField extends LinkedField<LuaEntity> {
         @Override
         public void update(LuaValue val) {
-            if (p.getPlayer() == null) return;
+            if (getHandle().getPlayer() == null) return;
 
             LuaVector vec;
             LuaTable tbl = val.checktable();
@@ -176,13 +170,13 @@ public class LuaPlayer extends WeakType {
             else
                 vec = new LuaVector(tbl.get(1).checkdouble(),
                         tbl.get(2).checkdouble(), tbl.get(3).checkdouble());
-            p.getPlayer().setVelocity(vec.getVector());
+            getHandle().getPlayer().setVelocity(vec.getVector());
         }
 
         @Override
         public LuaValue query() {
-            if (p.getPlayer() == null) return NIL;
-            return new LuaVector(p.getPlayer().getVelocity());
+            if (getHandle().getPlayer() == null) return NIL;
+            return new LuaVector(getHandle().getPlayer().getVelocity());
         }
     }
 

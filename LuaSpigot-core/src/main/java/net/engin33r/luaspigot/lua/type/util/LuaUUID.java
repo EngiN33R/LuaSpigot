@@ -1,8 +1,7 @@
 package net.engin33r.luaspigot.lua.type.util;
 
-import lombok.RequiredArgsConstructor;
 import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.WeakType;
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.annotation.MetaMethodDef;
 import org.luaj.vm2.LuaBoolean;
 import org.luaj.vm2.LuaValue;
@@ -13,13 +12,15 @@ import java.util.UUID;
 /**
  * Weak type to definitely represent UUIDs.
  */
-@RequiredArgsConstructor
-public class LuaUUID extends WeakType {
-    private final UUID uuid;
+public class LuaUUID extends WrapperType<UUID> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
+    public LuaUUID(UUID uuid) {
+        super(uuid);
+    }
+
     public LuaUUID(String uuid) {
-        this.uuid = UUID.fromString(uuid);
+        super(UUID.fromString(uuid));
     }
 
     @Override
@@ -29,11 +30,7 @@ public class LuaUUID extends WeakType {
 
     @Override
     public String toLuaString() {
-        return uuid.toString();
-    }
-
-    public UUID getUUID() {
-        return this.uuid;
+        return getHandle().toString();
     }
 
     @MetaMethodDef("__eq")
@@ -43,7 +40,7 @@ public class LuaUUID extends WeakType {
 
         LuaUUID uuid1 = (LuaUUID) arg.checktable(1);
         LuaUUID uuid2 = (LuaUUID) arg.checktable(2);
-        return LuaBoolean.valueOf(uuid1.getUUID().equals(uuid2.getUUID()));
+        return LuaBoolean.valueOf(uuid1.getHandle().equals(uuid2.getHandle()));
     }
 
     @Override

@@ -68,7 +68,7 @@ public class LuaBlockEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((BlockDispenseEvent) ev).setItem(((LuaItem)
-                            val.checktable()).getItem());
+                            val.checktable()).getHandle());
                 }
 
                 @Override

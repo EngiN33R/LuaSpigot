@@ -108,7 +108,7 @@ public class LuaInventoryEventFactory {
                     @Override
                     public void update(LuaValue val) {
                         ((InventoryClickEvent) ev).setCurrentItem(
-                                ((LuaItem) val.checktable()).getItem());
+                                ((LuaItem) val.checktable()).getHandle());
                     }
 
                     @Override
@@ -139,20 +139,21 @@ public class LuaInventoryEventFactory {
                 }
                 lev.registerField("newItems", newitems);
 
-                lev.registerLinkedField("cursor", new LinkedField<LuaEvent>(lev)
-                {
-                    @Override
-                    public void update(LuaValue val) {
-                        ((InventoryDragEvent) ev).setCursor(
-                                ((LuaItem) val.checktable()).getItem());
-                    }
+                lev.registerLinkedField("cursor",
+                        new LinkedField<LuaEvent>(lev) {
+                            @Override
+                            public void update(LuaValue val) {
+                                ((InventoryDragEvent) ev).setCursor(
+                                        ((LuaItem) val.checktable())
+                                                .getHandle());
+                            }
 
-                    @Override
-                    public LuaValue query() {
-                        return new LuaItem(((InventoryDragEvent) ev)
-                                .getCursor());
-                    }
-                });
+                            @Override
+                            public LuaValue query() {
+                                return new LuaItem(((InventoryDragEvent) ev)
+                                        .getCursor());
+                            }
+                        });
             }
         }
 

@@ -1,8 +1,8 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import org.bukkit.Location;
 import org.luaj.vm2.LuaNumber;
@@ -12,15 +12,11 @@ import org.luaj.vm2.Varargs;
 /**
  * Wrapper type describing a location in a world.
  */
-public class LuaLocation extends WeakType {
+public class LuaLocation extends WrapperType<Location> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
-    private final Location loc;
-    private LuaWorld worldCache;
-
     public LuaLocation(Location loc) {
-        this.loc = loc;
-        this.worldCache = new LuaWorld(loc.getWorld());
+        super(loc);
 
         registerLinkedField("world", new WorldField(this));
         registerLinkedField("x", new XField(this));
@@ -37,113 +33,119 @@ public class LuaLocation extends WeakType {
 
     @Override
     public String toLuaString() {
-        return "location: ["+loc.getX()+","+loc.getY()+","+loc.getZ()+"]@" +
-                loc.getWorld().getName()+"@("+loc.getPitch()+"," +
-                loc.getYaw()+")";
+        Location loc = getHandle();
+        return "location: [" + loc.getX() + "," + loc.getY() + ","
+                + loc.getZ() + "]@" + loc.getWorld().getName() + "@("
+                + loc.getPitch() + "," + loc.getYaw() + ")";
     }
 
     @MethodDef("getBlock")
     public Varargs getBlock(Varargs args) {
-        return new LuaBlock(this.loc);
+        return new LuaBlock(getHandle());
     }
 
     @MethodDef("distance")
     public Varargs distance(Varargs args) {
         TypeValidator.validate(args.checktable(1), "location");
-        Location loc2 = ((LuaLocation) args.checktable(1)).getLocation();
-        return LuaNumber.valueOf(loc.distance(loc2));
+        Location loc2 = ((LuaLocation) args.checktable(1)).getHandle();
+        return LuaNumber.valueOf(getHandle().distance(loc2));
     }
 
     private class WorldField extends LinkedField<LuaLocation> {
-        public WorldField(LuaLocation self) { super(self); }
+        public WorldField(LuaLocation self) {
+            super(self);
+        }
 
         @Override
         public void update(LuaValue val) {
             TypeValidator.validate(val.checktable(), "world");
-            loc.setWorld(((LuaWorld) val.checktable()).getWorld());
+            getHandle().setWorld(((LuaWorld) val.checktable()).getHandle());
         }
 
         @Override
         public LuaValue query() {
-            if (!worldCache.getWorld().equals(loc.getWorld())) {
-                worldCache = new LuaWorld(loc.getWorld());
-            }
-            return worldCache;
+            return new LuaWorld(getHandle().getWorld());
         }
     }
 
     private class XField extends LinkedField<LuaLocation> {
-        public XField(LuaLocation self) { super(self); }
+        public XField(LuaLocation self) {
+            super(self);
+        }
 
         @Override
         public void update(LuaValue val) {
-            loc.setX(val.checkdouble());
+            getHandle().setX(val.checkdouble());
         }
 
         @Override
         public LuaValue query() {
-            return LuaValue.valueOf(LuaLocation.this.loc.getX());
+            return LuaValue.valueOf(getHandle().getX());
         }
     }
 
     private class YField extends LinkedField<LuaLocation> {
-        public YField(LuaLocation self) { super(self); }
+        public YField(LuaLocation self) {
+            super(self);
+        }
 
         @Override
         public void update(LuaValue val) {
-            loc.setY(val.checkdouble());
+            getHandle().setY(val.checkdouble());
         }
 
         @Override
         public LuaValue query() {
-            return LuaValue.valueOf(LuaLocation.this.loc.getY());
+            return LuaValue.valueOf(getHandle().getY());
         }
     }
 
     private class ZField extends LinkedField<LuaLocation> {
-        public ZField(LuaLocation self) { super(self); }
+        public ZField(LuaLocation self) {
+            super(self);
+        }
 
         @Override
         public void update(LuaValue val) {
-            LuaLocation.this.loc.setZ(val.checkdouble());
+            getHandle().setZ(val.checkdouble());
         }
 
         @Override
         public LuaValue query() {
-            return LuaValue.valueOf(LuaLocation.this.loc.getZ());
+            return LuaValue.valueOf(getHandle().getZ());
         }
     }
 
     private class PitchField extends LinkedField<LuaLocation> {
-        public PitchField(LuaLocation self) { super(self); }
+        public PitchField(LuaLocation self) {
+            super(self);
+        }
 
         @Override
         public void update(LuaValue val) {
-            LuaLocation.this.loc.setPitch((float) val.checkdouble());
+            getHandle().setPitch((float) val.checkdouble());
         }
 
         @Override
         public LuaValue query() {
-            return LuaValue.valueOf(LuaLocation.this.loc.getPitch());
+            return LuaValue.valueOf(getHandle().getPitch());
         }
     }
 
     private class YawField extends LinkedField<LuaLocation> {
-        public YawField(LuaLocation self) { super(self); }
+        public YawField(LuaLocation self) {
+            super(self);
+        }
 
         @Override
         public void update(LuaValue val) {
-            LuaLocation.this.loc.setYaw((float) val.checkdouble());
+            getHandle().setYaw((float) val.checkdouble());
         }
 
         @Override
         public LuaValue query() {
-            return LuaValue.valueOf(LuaLocation.this.loc.getYaw());
+            return LuaValue.valueOf(getHandle().getYaw());
         }
-    }
-
-    public Location getLocation() {
-        return this.loc;
     }
 
     @Override

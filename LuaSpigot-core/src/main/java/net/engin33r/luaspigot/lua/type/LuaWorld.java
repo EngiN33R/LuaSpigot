@@ -1,7 +1,6 @@
 package net.engin33r.luaspigot.lua.type;
 
-import lombok.RequiredArgsConstructor;
-import net.engin33r.luaspigot.lua.WeakType;
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
 import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import org.bukkit.World;
@@ -10,11 +9,12 @@ import org.luaj.vm2.LuaValue;
 /**
  * Wrapper type describing a Minecraft world.
  */
-@RequiredArgsConstructor
-public class LuaWorld extends WeakType {
+public class LuaWorld extends WrapperType<World> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
-    private final World world;
+    public LuaWorld(World w) {
+        super(w);
+    }
 
     @Override
     public String getName() {
@@ -23,21 +23,18 @@ public class LuaWorld extends WeakType {
 
     @Override
     public String toLuaString() {
-        return "world: "+ world.getName()+" ("+ world.getUID().toString()+")";
-    }
-
-    public World getWorld() {
-        return this.world;
+        World w = getHandle();
+        return "world: " + w.getName() + " (" + w.getUID().toString() + ")";
     }
 
     @DynFieldDef("name")
     public LuaValue getWName() {
-        return LuaValue.valueOf(world.getName());
+        return LuaValue.valueOf(getHandle().getName());
     }
 
     @DynFieldDef("uuid")
     public LuaValue getUUID() {
-        return new LuaUUID(world.getUID());
+        return new LuaUUID(getHandle().getUID());
     }
 
     @Override

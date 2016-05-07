@@ -1,7 +1,7 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.WeakType;
 import org.bukkit.Material;
 import org.bukkit.inventory.*;
 import org.luaj.vm2.LuaString;
@@ -14,17 +14,17 @@ import java.util.Map;
 /**
  * Wrapper type describing a crafting recipe.
  */
-public class LuaRecipe extends WeakType {
+public class LuaRecipe extends WrapperType<Recipe> {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
-    private final Recipe r;
     private final String type;
 
     private Map<Character, ItemStack> map = new HashMap<>();
     private String[] strshape = {"", "", ""};
 
     public LuaRecipe(Recipe r) {
-        this.r = r;
+        super(r);
+
         if (r instanceof ShapedRecipe) {
             this.type = "shaped";
             registerLinkedField("shape", new ShapeField(this));
@@ -53,7 +53,7 @@ public class LuaRecipe extends WeakType {
 
         @Override
         public void update(LuaValue val) {
-            ShapedRecipe recipe = (ShapedRecipe) r;
+            ShapedRecipe recipe = (ShapedRecipe) getHandle();
             LuaTable shape = val.checktable();
             if (shape.length() == 0) error("recipe shape must have at least" +
                     " 1 item");
@@ -75,7 +75,7 @@ public class LuaRecipe extends WeakType {
 
         @Override
         public LuaValue query() {
-            ShapedRecipe recipe = (ShapedRecipe) r;
+            ShapedRecipe recipe = (ShapedRecipe) getHandle();
             LuaTable shape = LuaTable.tableOf();
 
             Map<Character, ItemStack> map = recipe.getIngredientMap();

@@ -69,7 +69,7 @@ public class LuaEntityEventFactory {
         if (ev instanceof EntityCreatePortalEvent) {
             LuaTable blocks = LuaTable.tableOf();
             for (BlockState bs : ((EntityCreatePortalEvent) ev).getBlocks()) {
-                blocks.set(blocks.length()+1, new LuaBlock(bs));
+                blocks.set(blocks.length() + 1, new LuaBlock(bs));
             }
             lev.registerField("blocks", blocks);
 
@@ -117,7 +117,7 @@ public class LuaEntityEventFactory {
                 @Override
                 public void set(LuaValue key, LuaValue value) {
                     ((EntityDamageEvent) ev).setDamage(EntityDamageEvent
-                            .DamageModifier.valueOf(key.checkjstring()),
+                                    .DamageModifier.valueOf(key.checkjstring()),
                             value.checkdouble());
                 }
 
@@ -233,7 +233,7 @@ public class LuaEntityEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((EntityShootBowEvent) ev).setProjectile(
-                            ((LuaEntity) val.checktable()).getEntity());
+                            ((LuaEntity) val.checktable()).getHandle());
                 }
 
                 @Override
@@ -257,7 +257,7 @@ public class LuaEntityEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((EntityTargetEvent) ev).setTarget(
-                            ((LuaEntity) val.checktable()).getEntity());
+                            ((LuaEntity) val.checktable()).getHandle());
                 }
 
                 @Override
@@ -274,7 +274,7 @@ public class LuaEntityEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((EntityTeleportEvent) ev).setFrom(
-                            ((LuaLocation) val.checktable()).getLocation());
+                            ((LuaLocation) val.checktable()).getHandle());
                 }
 
                 @Override
@@ -287,7 +287,7 @@ public class LuaEntityEventFactory {
                 @Override
                 public void update(LuaValue val) {
                     ((EntityTeleportEvent) ev).setTo(
-                            ((LuaLocation) val.checktable()).getLocation());
+                            ((LuaLocation) val.checktable()).getHandle());
                 }
 
                 @Override
@@ -507,7 +507,7 @@ public class LuaEntityEventFactory {
                 public Varargs call(Varargs args) {
                     ((PotionSplashEvent) ev).setIntensity(
                             (LivingEntity) ((LuaEntity) args.checktable(1))
-                                    .getEntity(),
+                                    .getHandle(),
                             args.checkdouble(2));
                     return NIL;
                 }
@@ -517,7 +517,7 @@ public class LuaEntityEventFactory {
                 public Varargs call(Varargs args) {
                     return LuaNumber.valueOf(((PotionSplashEvent) ev)
                             .getIntensity((LivingEntity) ((LuaEntity) args
-                                    .checktable(1)).getEntity()));
+                                    .checktable(1)).getHandle()));
                 }
             });
             lev.registerField("intensity", new LuaTable() {
@@ -525,13 +525,13 @@ public class LuaEntityEventFactory {
                 public LuaValue get(LuaValue key) {
                     return LuaNumber.valueOf(
                             ((PotionSplashEvent) ev).getIntensity((LivingEntity)
-                                    ((LuaEntity) key).getEntity()));
+                                    ((LuaEntity) key).getHandle()));
                 }
 
                 @Override
                 public void set(LuaValue key, LuaValue value) {
                     ((PotionSplashEvent) ev).setIntensity((LivingEntity)
-                            ((LuaEntity) key).getEntity(), value.checkdouble());
+                            ((LuaEntity) key).getHandle(), value.checkdouble());
                 }
             });
         }
@@ -539,12 +539,12 @@ public class LuaEntityEventFactory {
         if (ev instanceof ProjectileLaunchEvent ||
                 ev instanceof ProjectileHitEvent) {
             LuaEntity e = (LuaEntity) lev.get("entity");
-            Projectile proj = (Projectile) e.getEntity();
+            Projectile proj = (Projectile) e.getHandle();
             e.registerLinkedField("shooter", new LinkedField<LuaEvent>() {
                 @Override
                 public void update(LuaValue val) {
                     TypeValidator.validate(val.checktable(), "player");
-                    Player p = ((LuaPlayer) val.checktable()).getPlayer()
+                    Player p = ((LuaPlayer) val.checktable()).getHandle()
                             .getPlayer();
                     if (p == null) return;
                     proj.setShooter(p);
@@ -560,12 +560,12 @@ public class LuaEntityEventFactory {
             e.registerLinkedField("bounce", new LinkedField<LuaEvent>() {
                 @Override
                 public void update(LuaValue val) {
-                    ((Projectile) e.getEntity()).setBounce(val.checkboolean());
+                    ((Projectile) e.getHandle()).setBounce(val.checkboolean());
                 }
 
                 @Override
                 public LuaValue query() {
-                    return LuaBoolean.valueOf(((Projectile) e.getEntity())
+                    return LuaBoolean.valueOf(((Projectile) e.getHandle())
                             .doesBounce());
                 }
             });
