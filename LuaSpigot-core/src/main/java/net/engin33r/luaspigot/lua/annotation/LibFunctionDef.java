@@ -13,4 +13,5 @@ import static java.lang.annotation.ElementType.METHOD;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LibFunctionDef {
     String name();
+    String module() default "";
 }
