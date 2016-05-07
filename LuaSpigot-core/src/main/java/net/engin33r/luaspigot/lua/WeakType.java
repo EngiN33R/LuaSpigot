@@ -65,7 +65,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
 
             MetaMethodDef mtMethodAnn = m.getAnnotation(MetaMethodDef.class);
             if (mtMethodAnn != null) {
-                getMetatable().set(mtMethodAnn.name(), new VarArgFunction() {
+                getMetatable().set(mtMethodAnn.value(), new VarArgFunction() {
                     @Override
                     public Varargs invoke(Varargs args) {
                         try {
