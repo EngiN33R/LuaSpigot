@@ -1,4 +1,4 @@
-package net.engin33r.luaspigot.lua.type;
+package net.engin33r.luaspigot.lua.type.util;
 
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.WeakType;

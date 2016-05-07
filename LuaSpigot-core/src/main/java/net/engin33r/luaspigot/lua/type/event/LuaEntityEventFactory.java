@@ -1,16 +1,13 @@
 package net.engin33r.luaspigot.lua.type.event;
 
-import net.engin33r.luaspigot.lua.DynamicField;
-import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.Method;
-import net.engin33r.luaspigot.lua.TableBuilder;
+import net.engin33r.luaspigot.lua.*;
 import net.engin33r.luaspigot.lua.type.*;
+import net.engin33r.luaspigot.lua.type.util.LuaUUID;
+import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.DyeColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.AnimalTamer;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.luaj.vm2.*;
@@ -147,13 +144,13 @@ public class LuaEntityEventFactory {
                 }
             });
 
-            lev.registerField("items", TableBuilder.tableFrom(
+            lev.registerField("items", TableUtils.tableFrom(
                     ((EntityDeathEvent) ev).getDrops(),
                     i -> new LuaItem((ItemStack) i)));
         }
 
         if (ev instanceof EntityExplodeEvent) {
-            lev.registerField("blocks", TableBuilder.tableFrom(
+            lev.registerField("blocks", TableUtils.tableFrom(
                     ((EntityExplodeEvent) ev).blockList(),
                     b -> new LuaBlock((Block) b)));
 
@@ -498,7 +495,7 @@ public class LuaEntityEventFactory {
         }
 
         if (ev instanceof PotionSplashEvent) {
-            lev.registerField("affected", TableBuilder.tableFrom(
+            lev.registerField("affected", TableUtils.tableFrom(
                     ((PotionSplashEvent) ev).getAffectedEntities(),
                     e -> new LuaEntity((Entity) e)
             ));
@@ -535,6 +532,41 @@ public class LuaEntityEventFactory {
                 public void set(LuaValue key, LuaValue value) {
                     ((PotionSplashEvent) ev).setIntensity((LivingEntity)
                             ((LuaEntity) key).getEntity(), value.checkdouble());
+                }
+            });
+        }
+
+        if (ev instanceof ProjectileLaunchEvent ||
+                ev instanceof ProjectileHitEvent) {
+            LuaEntity e = (LuaEntity) lev.get("entity");
+            Projectile proj = (Projectile) e.getEntity();
+            e.registerLinkedField("shooter", new LinkedField<LuaEvent>() {
+                @Override
+                public void update(LuaValue val) {
+                    TypeValidator.validate(val.checktable(), "player");
+                    Player p = ((LuaPlayer) val.checktable()).getPlayer()
+                            .getPlayer();
+                    if (p == null) return;
+                    proj.setShooter(p);
+                }
+
+                @Override
+                public LuaValue query() {
+                    if (proj.getShooter() instanceof Player)
+                        return new LuaPlayer((Player) proj.getShooter());
+                    return NIL;
+                }
+            });
+            e.registerLinkedField("bounce", new LinkedField<LuaEvent>() {
+                @Override
+                public void update(LuaValue val) {
+                    ((Projectile) e.getEntity()).setBounce(val.checkboolean());
+                }
+
+                @Override
+                public LuaValue query() {
+                    return LuaBoolean.valueOf(((Projectile) e.getEntity())
+                            .doesBounce());
                 }
             });
         }

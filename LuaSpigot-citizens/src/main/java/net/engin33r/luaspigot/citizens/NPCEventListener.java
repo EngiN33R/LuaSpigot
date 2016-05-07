@@ -8,6 +8,7 @@ import net.citizensnpcs.api.npc.NPC;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.lib.EventLibrary;
 import net.engin33r.luaspigot.lua.type.*;
+import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;

@@ -2,6 +2,7 @@ package net.engin33r.luaspigot.lua.type.event;
 
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.type.*;
+import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.Instrument;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;

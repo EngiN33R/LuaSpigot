@@ -4,8 +4,10 @@ import net.engin33r.luaspigot.lua.DynamicField;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.Method;
 import net.engin33r.luaspigot.lua.type.*;
+import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.*;
@@ -190,8 +192,9 @@ public class LuaPlayerEventFactory {
         }
 
         if (ev instanceof PlayerFishEvent) {
-            lev.registerField("caught", new LuaEntity(((PlayerFishEvent) ev)
-                    .getCaught()));
+            Entity caught = ((PlayerFishEvent) ev).getCaught();
+            if (caught != null)
+                lev.registerField("caught", new LuaEntity(caught));
             lev.registerField("state", LuaString.valueOf(
                     ((PlayerFishEvent) ev).getState().toString()));
 

@@ -5,6 +5,7 @@ import net.engin33r.luaspigot.lua.TypeValidator;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -25,6 +26,7 @@ public class LuaEntity extends WeakType {
         this.entity = entity;
 
         registerLinkedField("location", new LocationField());
+        registerLinkedField("velocity", new VelocityField());
     }
 
     @Override
@@ -81,6 +83,25 @@ public class LuaEntity extends WeakType {
         @Override
         public LuaValue query() {
             return new LuaLocation(entity.getLocation());
+        }
+    }
+
+    private class VelocityField extends LinkedField<LuaEntity> {
+        @Override
+        public void update(LuaValue val) {
+            LuaVector vec;
+            LuaTable tbl = val.checktable();
+            if (tbl.get("type").optjstring("").equals("vector"))
+                vec = (LuaVector) tbl;
+            else
+                vec = new LuaVector(tbl.get(1).checkdouble(),
+                        tbl.get(2).checkdouble(), tbl.get(3).checkdouble());
+            entity.setVelocity(vec.getVector());
+        }
+
+        @Override
+        public LuaValue query() {
+            return new LuaVector(entity.getVelocity());
         }
     }
 

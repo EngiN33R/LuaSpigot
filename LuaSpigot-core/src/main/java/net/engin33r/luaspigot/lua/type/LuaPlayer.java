@@ -5,12 +5,13 @@ import net.engin33r.luaspigot.lua.TypeValidator;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.type.util.LuaUUID;
+import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -34,6 +35,7 @@ public class LuaPlayer extends WeakType {
 
         registerLinkedField("inventory", new InventoryField());
         registerLinkedField("location", new LocationField());
+        registerLinkedField("velocity", new VelocityField());
 
         if (p.getPlayer() != null)
             inv = new LuaInventory(p.getPlayer().getInventory());
@@ -159,6 +161,28 @@ public class LuaPlayer extends WeakType {
                 inv = new LuaInventory(p.getInventory());
 
             return inv;
+        }
+    }
+
+    private class VelocityField extends LinkedField<LuaEntity> {
+        @Override
+        public void update(LuaValue val) {
+            if (p.getPlayer() == null) return;
+
+            LuaVector vec;
+            LuaTable tbl = val.checktable();
+            if (tbl.get("type").optjstring("").equals("vector"))
+                vec = (LuaVector) tbl;
+            else
+                vec = new LuaVector(tbl.get(1).checkdouble(),
+                        tbl.get(2).checkdouble(), tbl.get(3).checkdouble());
+            p.getPlayer().setVelocity(vec.getVector());
+        }
+
+        @Override
+        public LuaValue query() {
+            if (p.getPlayer() == null) return NIL;
+            return new LuaVector(p.getPlayer().getVelocity());
         }
     }
 

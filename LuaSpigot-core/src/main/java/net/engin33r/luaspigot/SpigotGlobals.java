@@ -2,7 +2,7 @@ package net.engin33r.luaspigot;
 
 import lombok.RequiredArgsConstructor;
 import net.engin33r.luaspigot.lua.Library;
-import net.engin33r.luaspigot.lua.type.LuaUUID;
+import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;

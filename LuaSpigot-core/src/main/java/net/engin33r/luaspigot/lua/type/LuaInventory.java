@@ -1,6 +1,6 @@
 package net.engin33r.luaspigot.lua.type;
 
-import net.engin33r.luaspigot.lua.TableBuilder;
+import net.engin33r.luaspigot.lua.TableUtils;
 import net.engin33r.luaspigot.lua.TypeValidator;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
@@ -57,7 +57,7 @@ public class LuaInventory extends WeakType {
 
     @MethodDef(name = "getAll")
     public Varargs getAll(Varargs arg) {
-        return TableBuilder.tableFrom(
+        return TableUtils.tableFrom(
                 Arrays.asList(this.inv.getStorageContents()),
                 i -> new LuaItem((ItemStack) i));
     }

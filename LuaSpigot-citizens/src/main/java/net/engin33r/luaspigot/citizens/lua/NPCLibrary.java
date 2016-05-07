@@ -5,7 +5,7 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.engin33r.luaspigot.lua.Library;
 import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
-import net.engin33r.luaspigot.lua.type.LuaUUID;
+import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import org.bukkit.entity.EntityType;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.Varargs;

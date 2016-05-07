@@ -3,6 +3,7 @@ package net.engin33r.luaspigot.lua.type;
 import lombok.RequiredArgsConstructor;
 import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
+import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import org.bukkit.World;
 import org.luaj.vm2.LuaValue;
 

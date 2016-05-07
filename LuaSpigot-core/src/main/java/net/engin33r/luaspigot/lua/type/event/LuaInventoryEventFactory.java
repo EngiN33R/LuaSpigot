@@ -2,7 +2,7 @@ package net.engin33r.luaspigot.lua.type.event;
 
 import net.engin33r.luaspigot.lua.DynamicField;
 import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.TableBuilder;
+import net.engin33r.luaspigot.lua.TableUtils;
 import net.engin33r.luaspigot.lua.type.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.enchantment.*;
 import org.bukkit.event.inventory.*;
-import org.bukkit.inventory.ItemStack;
 import org.luaj.vm2.*;
 
 import java.util.Map;
@@ -18,7 +17,7 @@ import java.util.Map;
 public class LuaInventoryEventFactory {
     public static void build(InventoryEvent ev, LuaEvent lev) {
         lev.registerField("inventory", new LuaInventory(ev.getInventory()));
-        lev.registerField("viewers", TableBuilder.tableFrom(ev.getViewers(),
+        lev.registerField("viewers", TableUtils.tableFrom(ev.getViewers(),
                 e -> new LuaEntity((Entity) e)));
         // TODO: InventoryView
 
@@ -123,10 +122,10 @@ public class LuaInventoryEventFactory {
             if (ev instanceof InventoryDragEvent) {
                 lev.registerField("oldCursor", new LuaItem(
                         ((InventoryDragEvent) ev).getOldCursor()));
-                lev.registerField("slots", TableBuilder.tableFrom(
+                lev.registerField("slots", TableUtils.tableFrom(
                         ((InventoryDragEvent) ev).getInventorySlots(),
                         i -> LuaNumber.valueOf((Integer) i)));
-                lev.registerField("rawSlots", TableBuilder.tableFrom(
+                lev.registerField("rawSlots", TableUtils.tableFrom(
                         ((InventoryDragEvent) ev).getRawSlots(),
                         i -> LuaNumber.valueOf((Integer) i)));
                 lev.registerField("type", LuaString.valueOf(

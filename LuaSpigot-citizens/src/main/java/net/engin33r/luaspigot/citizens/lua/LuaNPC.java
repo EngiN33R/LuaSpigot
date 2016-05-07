@@ -10,7 +10,7 @@ import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
 import net.engin33r.luaspigot.lua.type.LuaEntity;
 import net.engin33r.luaspigot.lua.type.LuaLocation;
-import net.engin33r.luaspigot.lua.type.LuaUUID;
+import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.luaj.vm2.*;

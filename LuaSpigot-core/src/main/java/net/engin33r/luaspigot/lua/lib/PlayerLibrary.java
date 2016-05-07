@@ -3,7 +3,7 @@ package net.engin33r.luaspigot.lua.lib;
 import net.engin33r.luaspigot.lua.Library;
 import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
 import net.engin33r.luaspigot.lua.type.LuaPlayer;
-import net.engin33r.luaspigot.lua.type.LuaUUID;
+import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import org.bukkit.Bukkit;
 import org.luaj.vm2.Varargs;
 
