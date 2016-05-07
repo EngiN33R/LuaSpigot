@@ -93,6 +93,9 @@ public abstract class WeakType extends LuaTable implements IWeakType {
 
     @Override
     public LuaValue get(LuaValue key) {
+        LuaValue i = index(key);
+        if (i != null)
+            return i;
         if (dynFields.get(key) != null)
             return dynFields.get(key).query();
         if (linkedFields.get(key) != null)
