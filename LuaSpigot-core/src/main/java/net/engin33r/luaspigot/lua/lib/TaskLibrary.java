@@ -10,6 +10,9 @@ import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaNumber;
 import org.luaj.vm2.Varargs;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.luaj.vm2.LuaValue.NIL;
 
 /**
@@ -18,6 +21,7 @@ import static org.luaj.vm2.LuaValue.NIL;
 public class TaskLibrary extends Library {
     private final JavaPlugin plugin;
     private final BukkitScheduler scheduler;
+    private final Set<BukkitTask> spawnedTasks = new HashSet<>();
 
     public TaskLibrary(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -33,6 +37,7 @@ public class TaskLibrary extends Library {
     public Varargs schedAsync(Varargs args) {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTaskAsynchronously(plugin, run::call);
+        spawnedTasks.add(task);
         return LuaNumber.valueOf(task.getTaskId());
     }
 
@@ -41,6 +46,7 @@ public class TaskLibrary extends Library {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTaskTimerAsynchronously(plugin,
                 run::call, args.optlong(3, 0), args.checklong(2));
+        spawnedTasks.add(task);
         return LuaNumber.valueOf(task.getTaskId());
     }
 
@@ -49,6 +55,7 @@ public class TaskLibrary extends Library {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTaskLaterAsynchronously(plugin,
                 run::call, args.checklong(2));
+        spawnedTasks.add(task);
         return LuaNumber.valueOf(task.getTaskId());
     }
 
@@ -56,6 +63,7 @@ public class TaskLibrary extends Library {
     public Varargs schedSync(Varargs args) {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTask(plugin, run::call);
+        spawnedTasks.add(task);
         return LuaNumber.valueOf(task.getTaskId());
     }
 
@@ -64,6 +72,7 @@ public class TaskLibrary extends Library {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTaskTimer(plugin, run::call,
                 args.optlong(3, 0), args.checklong(2));
+        spawnedTasks.add(task);
         return LuaNumber.valueOf(task.getTaskId());
     }
 
@@ -72,18 +81,29 @@ public class TaskLibrary extends Library {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTaskLater(plugin, run::call,
                 args.checklong(2));
+        spawnedTasks.add(task);
         return LuaNumber.valueOf(task.getTaskId());
     }
 
     @LibFunctionDef(name = "cancel")
     public Varargs cancel(Varargs args) {
-        scheduler.cancelTask(args.checkint(1));
+        int id = args.checkint(1);
+        spawnedTasks.stream().filter(t -> t.getTaskId() == id)
+                .forEach(BukkitTask::cancel);
+        spawnedTasks.removeIf(t -> t.getTaskId() == id);
+        scheduler.cancelTask(id);
         return NIL;
     }
 
     @LibFunctionDef(name = "cancelAll")
     public Varargs cancelAll(Varargs args) {
         scheduler.cancelAllTasks();
+        spawnedTasks.clear();
         return NIL;
+    }
+
+    public void stop() {
+        spawnedTasks.stream().forEach(BukkitTask::cancel);
+        spawnedTasks.clear();
     }
 }
