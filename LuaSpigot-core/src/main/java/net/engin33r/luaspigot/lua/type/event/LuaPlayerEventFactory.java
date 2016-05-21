@@ -250,6 +250,8 @@ public class LuaPlayerEventFactory {
                     ((PlayerInteractEvent) ev).hasItem()));
             lev.registerField("blockPlaced", LuaBoolean.valueOf(
                     ((PlayerInteractEvent) ev).isBlockInHand()));
+            lev.registerField("hand", LuaString.valueOf(
+                    ((PlayerInteractEvent) ev).getHand().name()));
 
             lev.registerLinkedField("blockAction", new LinkedField<LuaEvent>() {
                 @Override
