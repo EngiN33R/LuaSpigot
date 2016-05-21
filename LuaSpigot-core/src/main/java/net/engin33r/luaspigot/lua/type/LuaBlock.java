@@ -1,33 +1,35 @@
 package net.engin33r.luaspigot.lua.type;
 
-import net.engin33r.luaspigot.lua.WrapperType;
+import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.Method;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.material.MaterialData;
 import org.luaj.vm2.*;
 
 /**
  * Wrapper type representing a single block within the world.
  */
-public class LuaBlock extends WrapperType<Block> {
+public class LuaBlock extends WeakType {
     private static LuaValue typeMetatable = LuaValue.tableOf();
 
+    private Block block;
     private BlockState state;
     private boolean dynamic = false;
     private Material matCache;
 
     public LuaBlock(Block block) {
-        super(block);
-
+        this.block = block;
         this.dynamic = true;
         this.matCache = block.getType();
 
         registerField("dynamic", LuaBoolean.valueOf(true));
 
-        registerLinkedField("material", new MaterialField(this));
+        registerLinkedField("material", new MaterialField());
+        registerLinkedField("data", new DataField());
         registerField("x", LuaNumber.valueOf(block.getX()));
         registerField("y", LuaNumber.valueOf(block.getY()));
         registerField("z", LuaNumber.valueOf(block.getZ()));
@@ -39,20 +41,22 @@ public class LuaBlock extends WrapperType<Block> {
         registerField("location", new LuaLocation(block.getLocation()));
         registerField("temperature", LuaNumber.valueOf(block
                 .getTemperature()));
+        registerField("light", LuaNumber.valueOf(block.getLightLevel()));
         registerField("world", new LuaWorld(block.getWorld()));
     }
 
     public LuaBlock(BlockState state) {
-        super(null);
-
         this.state = state;
         this.matCache = state.getType();
 
         registerField("block", new LuaBlock(state.getBlock()));
-        registerLinkedField("material", new MaterialField(this));
+
+        registerLinkedField("material", new MaterialField());
+        registerLinkedField("data", new DataField());
         registerField("x", LuaNumber.valueOf(state.getX()));
         registerField("y", LuaNumber.valueOf(state.getY()));
         registerField("z", LuaNumber.valueOf(state.getZ()));
+
         registerField("light", LuaNumber.valueOf(state.getLightLevel()));
         registerField("location", new LuaLocation(state.getLocation()));
         registerField("world", new LuaWorld(state.getWorld()));
@@ -71,6 +75,10 @@ public class LuaBlock extends WrapperType<Block> {
         this(loc.getBlock());
     }
 
+    public Object getHandle() {
+        return dynamic ? block : state;
+    }
+
     @Override
     protected LuaValue getMetatable() {
         return typeMetatable;
@@ -82,13 +90,11 @@ public class LuaBlock extends WrapperType<Block> {
     }
 
     private class MaterialField extends LinkedField<LuaBlock> {
-        public MaterialField(LuaBlock self) { super(self); }
-
         @Override
         public void update(LuaValue val) {
             matCache = Material.getMaterial(val.checkjstring());
             if (dynamic)
-                getHandle().setType(matCache);
+                block.setType(matCache);
             else
                 state.setType(matCache);
         }
@@ -96,8 +102,8 @@ public class LuaBlock extends WrapperType<Block> {
         @Override
         public LuaValue query() {
             if (dynamic) {
-                if (!matCache.equals(getHandle().getType())) {
-                    matCache = getHandle().getType();
+                if (!matCache.equals(block.getType())) {
+                    matCache = block.getType();
                 }
             } else {
                 if (!matCache.equals(state.getType())) {
@@ -106,6 +112,27 @@ public class LuaBlock extends WrapperType<Block> {
             }
 
             return LuaString.valueOf(matCache.toString());
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private class DataField extends LinkedField<LuaBlock> {
+        @Override
+        public void update(LuaValue val) {
+            if (dynamic)
+                block.setData((byte) val.checkint());
+            else
+                state.setData(new MaterialData(block.getType(),
+                        (byte) val.checkint()));
+        }
+
+        @Override
+        public LuaValue query() {
+            if (dynamic) {
+                return LuaNumber.valueOf(block.getData());
+            } else {
+                return LuaNumber.valueOf(state.getData().getData());
+            }
         }
     }
 }
