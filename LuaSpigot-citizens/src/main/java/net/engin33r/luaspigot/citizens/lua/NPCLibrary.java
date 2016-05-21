@@ -3,12 +3,15 @@ package net.engin33r.luaspigot.citizens.lua;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
+import net.citizensnpcs.api.trait.TraitInfo;
 import net.engin33r.luaspigot.lua.Library;
 import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
 import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import org.bukkit.entity.EntityType;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.Varargs;
+
+import static org.luaj.vm2.LuaValue.NIL;
 
 /**
  * Library for NPC discovery and creation
@@ -38,6 +41,12 @@ public class NPCLibrary extends Library {
         return new LuaNPC(registry.getByUniqueIdGlobal(uuid.getHandle()));
     }
 
+    @LibFunctionDef(name = "fromID")
+    public Varargs getByID(Varargs args) {
+        int id = args.checkint(1);
+        return new LuaNPC(registry.getById(id));
+    }
+
     @LibFunctionDef(name = "list")
     public Varargs list(Varargs args) {
         LuaTable tbl = LuaTable.tableOf();
@@ -56,5 +65,16 @@ public class NPCLibrary extends Library {
                 tbl.set(tbl.length()+1, new LuaNPC(npc));
         }
         return tbl;
+    }
+
+    @LibFunctionDef(name = "defineTrait")
+    public Varargs defineTrait(Varargs args) {
+        String name = args.checkjstring(1);
+
+        LuaNPCTrait.NPCTrait trait = new LuaNPCTrait.NPCTrait();
+
+        CitizensAPI.getTraitFactory().registerTrait(TraitInfo
+                .create(trait.getClass()).withName(name));
+        return new LuaNPCTrait(trait);
     }
 }
