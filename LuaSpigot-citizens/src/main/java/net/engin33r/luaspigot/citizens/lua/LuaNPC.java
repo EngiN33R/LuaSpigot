@@ -5,6 +5,7 @@ import net.citizensnpcs.api.event.DespawnReason;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
 import net.engin33r.luaspigot.lua.LinkedField;
+import net.engin33r.luaspigot.lua.TableUtils;
 import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
 import net.engin33r.luaspigot.lua.annotation.MethodDef;
@@ -34,6 +35,7 @@ public class LuaNPC extends WrapperType<NPC> {
         registerLinkedField("protected", new ProtectedField(this));
     }
 
+    @SuppressWarnings("unused")
     public static void registerTraitAdapter(
             String name, Class<? extends LuaNPCTrait> clazz) {
         traitAdapters.put(name, clazz);
@@ -65,12 +67,9 @@ public class LuaNPC extends WrapperType<NPC> {
 
     @DynFieldDef("traits")
     public LuaValue getTraits() {
-        LuaTable traits = LuaTable.tableOf();
-        for (Trait trait : getHandle().getTraits()) {
-            traits.set(traits.length() + 1, LuaString.valueOf(trait
-                    .getName()));
-        }
-        return traits;
+        return TableUtils.tableFrom(getHandle().getTraits(),
+                trait -> LuaString.valueOf(CitizensAPI.getTraitFactory()
+                        .getTrait(trait.getClass()).getName()));
     }
 
     @DynFieldDef("spawned")
@@ -131,8 +130,9 @@ public class LuaNPC extends WrapperType<NPC> {
 
     @MethodDef("hasTrait")
     public Varargs hasTrait(Varargs args) {
-        return LuaBoolean.valueOf(getHandle().hasTrait(CitizensAPI.getTraitFactory()
-                .getTrait(args.checkjstring(1)).getClass()));
+        Trait t = CitizensAPI.getTraitFactory().getTrait(args.checkjstring(1));
+        if (t == null) return FALSE;
+        return LuaBoolean.valueOf(getHandle().hasTrait(t.getClass()));
     }
 
     @MethodDef("getTrait")
