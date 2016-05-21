@@ -108,7 +108,7 @@ public class TableUtils {
         for (int i = 1; i <= tbl.length(); i++) {
             T obj = processor.process(tbl.get(i));
             if (!nonull || obj != null) {
-                list.add(i, obj);
+                list.add(i-1, obj);
             }
         }
         return list;
