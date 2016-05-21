@@ -10,8 +10,8 @@ public class TableUtils {
      * Processor interface used in array-to-table and collection-to-table
      * transformations.
      */
-    public interface Processor {
-        LuaValue process(Object o);
+    public interface Processor<T> {
+        LuaValue process(T o);
     }
 
     /**
@@ -41,9 +41,9 @@ public class TableUtils {
      * @return Table of transformed objects in the exact sequence they were
      * passed to the method.
      */
-    public static LuaTable tableFrom(Object[] arr, Processor processor) {
+    public static <T> LuaTable tableFrom(T[] arr, Processor<T> processor) {
         LuaTable tbl = LuaTable.tableOf();
-        for (Object o : arr) {
+        for (T o : arr) {
             tbl.set(tbl.length()+1, processor.process(o));
         }
         return tbl;
@@ -58,9 +58,26 @@ public class TableUtils {
      * passed to the method.
      */
     public static <T> LuaTable tableFrom(Collection<T> coll,
-                                         Processor processor) {
+                                         Processor<T> processor) {
         LuaTable tbl = LuaTable.tableOf();
         for (T o : coll) {
+            tbl.set(tbl.length()+1, processor.process(o));
+        }
+        return tbl;
+    }
+
+    /**
+     * Create a table from an object iterator. How each object is converted
+     * is dependent on the implementation of the processor passed to the method.
+     * @param iter Collection of objects
+     * @param processor Processor
+     * @return Table of transformed objects in the exact sequence they were
+     * passed to the method.
+     */
+    public static <T> LuaTable tableFrom(Iterable<T> iter,
+                                         Processor<T> processor) {
+        LuaTable tbl = LuaTable.tableOf();
+        for (T o : iter) {
             tbl.set(tbl.length()+1, processor.process(o));
         }
         return tbl;

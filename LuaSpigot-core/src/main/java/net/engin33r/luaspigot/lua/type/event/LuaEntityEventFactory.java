@@ -145,14 +145,12 @@ public class LuaEntityEventFactory {
             });
 
             lev.registerField("items", TableUtils.tableFrom(
-                    ((EntityDeathEvent) ev).getDrops(),
-                    i -> new LuaItem((ItemStack) i)));
+                    ((EntityDeathEvent) ev).getDrops(), LuaItem::new));
         }
 
         if (ev instanceof EntityExplodeEvent) {
             lev.registerField("blocks", TableUtils.tableFrom(
-                    ((EntityExplodeEvent) ev).blockList(),
-                    b -> new LuaBlock((Block) b)));
+                    ((EntityExplodeEvent) ev).blockList(), LuaBlock::new));
 
             lev.registerField("location", new LuaLocation(
                     ((EntityExplodeEvent) ev).getLocation()));
@@ -497,8 +495,7 @@ public class LuaEntityEventFactory {
         if (ev instanceof PotionSplashEvent) {
             lev.registerField("affected", TableUtils.tableFrom(
                     ((PotionSplashEvent) ev).getAffectedEntities(),
-                    e -> new LuaEntity((Entity) e)
-            ));
+                    LuaEntity::new));
             lev.registerField("potion", new LuaEntity(((PotionSplashEvent) ev)
                     .getPotion()));
 

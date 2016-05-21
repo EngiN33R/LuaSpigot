@@ -18,7 +18,7 @@ public class LuaInventoryEventFactory {
     public static void build(InventoryEvent ev, LuaEvent lev) {
         lev.registerField("inventory", new LuaInventory(ev.getInventory()));
         lev.registerField("viewers", TableUtils.tableFrom(ev.getViewers(),
-                e -> new LuaEntity((Entity) e)));
+                LuaEntity::new));
         // TODO: InventoryView
 
         if (ev instanceof CraftItemEvent) {
@@ -124,10 +124,10 @@ public class LuaInventoryEventFactory {
                         ((InventoryDragEvent) ev).getOldCursor()));
                 lev.registerField("slots", TableUtils.tableFrom(
                         ((InventoryDragEvent) ev).getInventorySlots(),
-                        i -> LuaNumber.valueOf((Integer) i)));
+                        LuaNumber::valueOf));
                 lev.registerField("rawSlots", TableUtils.tableFrom(
                         ((InventoryDragEvent) ev).getRawSlots(),
-                        i -> LuaNumber.valueOf((Integer) i)));
+                        LuaNumber::valueOf));
                 lev.registerField("type", LuaString.valueOf(
                         ((InventoryDragEvent) ev).getType().toString()));
 
