@@ -4,6 +4,7 @@ import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.type.*;
 import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.Instrument;
+import org.bukkit.Note;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.block.*;
@@ -11,6 +12,7 @@ import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceExtractEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
+import org.bukkit.inventory.ItemStack;
 import org.luaj.vm2.*;
 
 public class LuaBlockEventFactory {
@@ -19,7 +21,10 @@ public class LuaBlockEventFactory {
         lev.registerField("block", lb);
 
         if (ev instanceof BrewEvent) {
-
+            BrewEvent cev = (BrewEvent) ev;
+            lev.registerField("contents", new LuaInventory(cev.getContents()));
+            lev.registerDynamicField("fuel",
+                    () -> LuaNumber.valueOf(cev.getFuelLevel()));
         }
 
         if (ev instanceof BlockCanBuildEvent) {
@@ -224,34 +229,70 @@ public class LuaBlockEventFactory {
         }
 
         if (ev instanceof FurnaceBurnEvent) {
-
+            FurnaceBurnEvent cev = (FurnaceBurnEvent) ev;
+            lev.registerField("fuel", new LuaItem(cev.getFuel()));
+            lev.registerLinkedField("time",
+                    val -> cev.setBurnTime(val.checkint()),
+                    () -> LuaNumber.valueOf(cev.getBurnTime()));
+            lev.registerLinkedField("burning",
+                    val -> cev.setBurning(val.checkboolean()),
+                    () -> LuaBoolean.valueOf(cev.isBurning()));
         }
 
         if (ev instanceof FurnaceExtractEvent) {
-
+            FurnaceExtractEvent cev = (FurnaceExtractEvent) ev;
+            lev.registerField("item", new LuaItem(
+                    new ItemStack(cev.getItemType(), cev.getItemAmount())));
+            lev.registerField("player", new LuaPlayer(cev.getPlayer()));
         }
 
         if (ev instanceof FurnaceSmeltEvent) {
-
+            FurnaceSmeltEvent cev = (FurnaceSmeltEvent) ev;
+            lev.registerField("source", new LuaItem(cev.getSource()));
+            lev.registerLinkedField("result",
+                    val -> cev.setResult(((LuaItem) val).getHandle()),
+                    () -> new LuaItem(cev.getResult()));
         }
 
         if (ev instanceof NotePlayEvent) {
+            NotePlayEvent cev = (NotePlayEvent) ev;
             lev.registerLinkedField("instrument", new LinkedField<LuaEvent>(
                     lev) {
                 @Override
                 public void update(LuaValue val) {
-                    ((NotePlayEvent) ev).setInstrument(Instrument.valueOf(
+                    cev.setInstrument(Instrument.valueOf(
                             val.checkjstring().toUpperCase()));
                 }
 
                 @Override
                 public LuaValue query() {
-                    return LuaString.valueOf(((NotePlayEvent) ev)
+                    return LuaString.valueOf(cev
                             .getInstrument().toString());
                 }
             });
 
-            // TODO: Note
+            lev.registerLinkedField("note",
+                    val -> {
+                        LuaTable note = val.checktable();
+                        Note newNote = new Note(
+                                note.get("octave").checkint(),
+                                Note.Tone.valueOf(note.get("tone")
+                                        .checkjstring()),
+                                note.get("sharped").checkboolean());
+                        cev.setNote(newNote);
+                    },
+                    () -> {
+                        LuaImmutableTable note = new LuaImmutableTable();
+                        note.set(LuaString.valueOf("octave"),
+                                LuaNumber.valueOf(cev.getNote().getOctave()));
+                        note.set(LuaString.valueOf("tone"),
+                                LuaString.valueOf(cev.getNote().getTone()
+                                        .name()));
+                        note.set(LuaString.valueOf("sharped"),
+                                LuaBoolean.valueOf(cev.getNote().isSharped()));
+                        note.lock();
+                        return note;
+                    });
         }
 
         if (ev instanceof SignChangeEvent) {

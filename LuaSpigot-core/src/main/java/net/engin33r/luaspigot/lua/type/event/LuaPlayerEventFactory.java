@@ -8,6 +8,7 @@ import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.*;
@@ -64,9 +65,9 @@ public class LuaPlayerEventFactory {
                     });
         }
 
-        if (ev instanceof PlayerAchievementAwardedEvent) {
-            lev.registerField("achievement", LuaString.valueOf(
-                    ((PlayerAchievementAwardedEvent) ev).getAchievement()
+        if (ev instanceof PlayerAdvancementDoneEvent) {
+            lev.registerField("advancement", LuaString.valueOf(
+                    ((PlayerAdvancementDoneEvent) ev).getAdvancement()
                             .toString()));
         }
 
@@ -165,15 +166,32 @@ public class LuaPlayerEventFactory {
         }
 
         if (ev instanceof PlayerDropItemEvent) {
-            // TODO: Make items work with Item and not just ItemStack
+            lev.registerField("item", new LuaItem(
+                    ((PlayerDropItemEvent) ev).getItemDrop()));
         }
 
         if (ev instanceof PlayerEditBookEvent) {
-            // TODO: Make LuaBook
+            PlayerEditBookEvent cev = (PlayerEditBookEvent) ev;
+            lev.registerField("newBook", new LuaBook(
+                    cev.getNewBookMeta()));
+            lev.registerField("oldBook", new LuaBook(
+                    cev.getPreviousBookMeta()));
         }
 
         if (ev instanceof PlayerEggThrowEvent) {
-            // TODO: Process projectiles
+            PlayerEggThrowEvent cev = (PlayerEggThrowEvent) ev;
+            lev.registerLinkedField("type",
+                    val -> cev.setHatchingType(EntityType.valueOf(val.checkjstring())),
+                    () -> LuaString.valueOf(cev.getHatchingType().name())
+            );
+            lev.registerLinkedField("hatching",
+                    val -> cev.setHatching(val.checkboolean()),
+                    () -> LuaBoolean.valueOf(cev.isHatching())
+            );
+            lev.registerLinkedField("numHatches",
+                    val -> cev.setNumHatches((byte) val.checkint()),
+                    () -> LuaNumber.valueOf(cev.getNumHatches())
+            );
         }
 
         if (ev instanceof PlayerExpChangeEvent) {
@@ -208,20 +226,6 @@ public class LuaPlayerEventFactory {
                 public LuaValue query() {
                     return LuaNumber.valueOf(((PlayerFishEvent) ev)
                             .getExpToDrop());
-                }
-            });
-            lev.registerLinkedField("bitechance", new LinkedField<LuaEvent>(
-                    lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerFishEvent) ev).getHook().setBiteChance(
-                            val.checkdouble());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaNumber.valueOf(((PlayerFishEvent) ev)
-                            .getHook().getBiteChance());
                 }
             });
         }
@@ -448,14 +452,11 @@ public class LuaPlayerEventFactory {
             });
         }
 
-        if (ev instanceof PlayerPickupItemEvent) {
-            // TODO: Add Item handling
-            lev.registerField("remaining", LuaNumber.valueOf(
-                    ((PlayerPickupItemEvent) ev).getRemaining()));
-        }
-
         if (ev instanceof PlayerPortalEvent) {
-            // TODO: Travel agent?
+            lev.registerField("from", new LuaLocation(
+                    ((PlayerPortalEvent) ev).getFrom()));
+            lev.registerField("to", new LuaLocation(
+                    ((PlayerPortalEvent) ev).getTo()));
         }
 
         if (ev instanceof PlayerQuitEvent) {

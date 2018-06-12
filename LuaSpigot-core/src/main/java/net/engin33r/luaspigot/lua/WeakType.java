@@ -130,6 +130,17 @@ public abstract class WeakType extends LuaTable implements IWeakType {
         registerDynamicField(LuaValue.valueOf(name), field);
     }
 
+    public void registerDynamicField(String name,
+                                     java.util.function.Supplier<LuaValue> query) {
+        registerDynamicField(LuaValue.valueOf(name),
+                new DynamicField<WeakType>(this) {
+                    @Override
+                    public LuaValue query() {
+                        return query.get();
+                    }
+                });
+    }
+
     public void registerDynamicField(LuaValue key, DynamicField field) {
         dynFields.put(key, field);
     }
@@ -140,6 +151,23 @@ public abstract class WeakType extends LuaTable implements IWeakType {
 
     public void registerLinkedField(String name, LinkedField field) {
         registerLinkedField(LuaValue.valueOf(name), field);
+    }
+
+    public void registerLinkedField(String name,
+                                    java.util.function.Consumer<LuaValue> update,
+                                    java.util.function.Supplier<LuaValue> query) {
+        registerLinkedField(LuaValue.valueOf(name),
+                new LinkedField<WeakType>() {
+                    @Override
+                    public void update(LuaValue val) {
+                        update.accept(val);
+                    }
+
+                    @Override
+                    public LuaValue query() {
+                        return query.get();
+                    }
+                });
     }
 
     public void registerLinkedField(LuaValue key, LinkedField field) {

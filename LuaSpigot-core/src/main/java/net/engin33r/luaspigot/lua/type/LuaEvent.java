@@ -112,9 +112,9 @@ public class LuaEvent extends WrapperType<Event> {
         }
 
         if (ev instanceof InventoryPickupItemEvent) {
-            registerField("inventory", new LuaInventory(
-                    ((InventoryPickupItemEvent) ev).getInventory()));
-            // TODO: Item
+            InventoryPickupItemEvent cev = (InventoryPickupItemEvent) ev;
+            registerField("inventory", new LuaInventory(cev.getInventory()));
+            registerField("item", new LuaItem(cev.getItem()));
         }
 
         if (ev instanceof PlayerLeashEntityEvent) {
@@ -159,7 +159,7 @@ public class LuaEvent extends WrapperType<Event> {
 
     // 100% type-safety guarantee
     private class CancelledField extends LinkedField<LuaEvent> {
-        public CancelledField(WeakType self) { super(self); }
+        public CancelledField(LuaEvent self) { super(self); }
 
         @Override
         public void update(LuaValue val) {

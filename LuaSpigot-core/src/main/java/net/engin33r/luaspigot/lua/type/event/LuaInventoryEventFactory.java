@@ -5,7 +5,6 @@ import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.TableUtils;
 import net.engin33r.luaspigot.lua.type.*;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.enchantment.*;

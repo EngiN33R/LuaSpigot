@@ -69,7 +69,7 @@ public class LuaDB extends WeakType {
 
             while (result.next()) {
                 LuaTable row = LuaTable.tableOf();
-                for (int i = 0; i < mdata.getColumnCount(); i++) {
+                for (int i = 1; i <= mdata.getColumnCount(); i++) {
                     int type = mdata.getColumnType(i);
                     switch (type) {
                         case Types.BOOLEAN:

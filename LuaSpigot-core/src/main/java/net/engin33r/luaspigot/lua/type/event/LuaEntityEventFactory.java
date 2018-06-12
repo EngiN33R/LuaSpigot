@@ -9,7 +9,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.*;
-import org.bukkit.inventory.ItemStack;
 import org.luaj.vm2.*;
 
 import static org.luaj.vm2.LuaValue.NIL;
@@ -112,22 +111,6 @@ public class LuaEntityEventFactory {
                             .getDamage());
                 }
             });
-
-            lev.registerField("modified", new LuaTable() {
-                @Override
-                public void set(LuaValue key, LuaValue value) {
-                    ((EntityDamageEvent) ev).setDamage(EntityDamageEvent
-                                    .DamageModifier.valueOf(key.checkjstring()),
-                            value.checkdouble());
-                }
-
-                @Override
-                public LuaValue get(LuaValue key) {
-                    return LuaNumber.valueOf(((EntityDamageEvent) ev).getDamage(
-                            EntityDamageEvent.DamageModifier
-                                    .valueOf(key.checkjstring())));
-                }
-            });
         }
 
         if (ev instanceof EntityDeathEvent) {
@@ -175,13 +158,23 @@ public class LuaEntityEventFactory {
                     ((EntityInteractEvent) ev).getBlock()));
         }
 
+        if (ev instanceof EntityPickupItemEvent) {
+            EntityPickupItemEvent cev = (EntityPickupItemEvent) ev;
+            lev.registerField("item", new LuaItem(cev.getItem()));
+            lev.registerField("remaining", LuaNumber.valueOf(
+                    cev.getRemaining()));
+        }
+
         if (ev instanceof EntityPortalEnterEvent) {
             lev.registerField("location", new LuaLocation(
                     ((EntityPortalEnterEvent) ev).getLocation()));
         }
 
         if (ev instanceof EntityPortalEvent) {
-            // TODO: Travel agent
+            lev.registerField("from", new LuaLocation(
+                    ((EntityPortalEvent) ev).getFrom()));
+            lev.registerField("to", new LuaLocation(
+                    ((EntityPortalEvent) ev).getTo()));
         }
 
         if (ev instanceof EntityPortalExitEvent) {
@@ -372,12 +365,7 @@ public class LuaEntityEventFactory {
         }
 
         if (ev instanceof HorseJumpEvent) {
-            lev.registerLinkedField("power", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((HorseJumpEvent) ev).setPower((float) val.checkdouble());
-                }
-
+            lev.registerDynamicField("power", new DynamicField<LuaEvent>(lev) {
                 @Override
                 public LuaValue query() {
                     return LuaNumber.valueOf(

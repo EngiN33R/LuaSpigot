@@ -7,8 +7,8 @@ import org.luaj.vm2.LuaValue;
  * that updates every time it's queried for and performs an action whenever
  * it is updated.
  */
-public abstract class LinkedField<T extends WeakType> extends DynamicField {
-    public LinkedField(WeakType self) { super(self); }
+public abstract class LinkedField<T extends WeakType> extends DynamicField<T> {
+    public LinkedField(T self) { super(self); }
     public LinkedField() { super(null); } // Convenience
 
     public abstract void update(LuaValue val);
