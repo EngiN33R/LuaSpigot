@@ -1,7 +1,7 @@
 package net.engin33r.luaspigot.lua.lib;
 
 import net.engin33r.luaspigot.lua.Library;
-import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
+import net.engin33r.luaspigot.lua.annotation.LibraryFunctionDefinition;
 import net.engin33r.luaspigot.lua.type.LuaConfig;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.luaj.vm2.*;
@@ -20,7 +20,7 @@ public class ConfigLibrary extends Library {
         return "config";
     }
 
-    @LibFunctionDef(name = "load")
+    @LibraryFunctionDefinition("load")
     public Varargs load(Varargs args) {
         String path = args.checkjstring(1);
         YamlConfiguration config = YamlConfiguration.loadConfiguration(
@@ -29,7 +29,7 @@ public class ConfigLibrary extends Library {
         return new LuaConfig(config);
     }
 
-    @LibFunctionDef(name = "parse")
+    @LibraryFunctionDefinition("parse")
     public Varargs parse(Varargs args) {
         String path = args.checkjstring(1);
         YamlConfiguration config = YamlConfiguration.loadConfiguration(

@@ -5,7 +5,7 @@ import net.engin33r.luaspigot.citizens.lua.LuaNPC;
 import net.citizensnpcs.api.ai.speech.event.NPCSpeechEvent;
 import net.citizensnpcs.api.event.*;
 import net.citizensnpcs.api.npc.NPC;
-import net.engin33r.luaspigot.lua.LinkedField;
+import net.engin33r.luaspigot.lua.TypeUtils;
 import net.engin33r.luaspigot.lua.lib.EventLibrary;
 import net.engin33r.luaspigot.lua.type.*;
 import net.engin33r.luaspigot.lua.type.util.LuaVector;
@@ -34,7 +34,7 @@ public class NPCEventListener extends EventListener {
     }
 
     private void processSender(CommandSender sender, LuaEvent lev) {
-        lev.registerField("name", LuaString.valueOf(sender.getName()));
+        lev.registerField("value", LuaString.valueOf(sender.getName()));
         if (sender instanceof Player) {
             lev.registerField("player", new LuaPlayer((Player) sender));
         } else if (sender instanceof CommandMinecart) {
@@ -80,17 +80,9 @@ public class NPCEventListener extends EventListener {
     @EventHandler(priority = EventPriority.LOW)
     public void onNPCCombust(NPCCombustEvent ev) {
         LuaEvent lev = buildEvent(ev);
-        lev.registerLinkedField("duration", new LinkedField<LuaNPC>() {
-            @Override
-            public void update(LuaValue val) {
-                ev.setDuration(val.checkint());
-            }
-
-            @Override
-            public LuaValue query() {
-                return LuaNumber.valueOf(ev.getDuration());
-            }
-        });
+        lev.registerLinkedField("duration",
+                val -> ev.setDuration(val.checkint()),
+                () -> LuaNumber.valueOf(ev.getDuration()));
         lib.callEvent("NPCCombust", lev);
     }
 
@@ -106,17 +98,9 @@ public class NPCEventListener extends EventListener {
 
         lev.registerField("cause", LuaString.valueOf(ev.getCause().name()
                 .toLowerCase()));
-        lev.registerLinkedField("damage", new LinkedField<LuaNPC>() {
-            @Override
-            public void update(LuaValue val) {
-                ev.setDamage(val.checkint());
-            }
-
-            @Override
-            public LuaValue query() {
-                return LuaNumber.valueOf(ev.getDamage());
-            }
-        });
+        lev.registerLinkedField("damage",
+                val -> ev.setDamage(val.checkint()),
+                () -> LuaNumber.valueOf(ev.getDamage()));
         lib.callEvent("NPCDamage", lev);
     }
 
@@ -144,17 +128,10 @@ public class NPCEventListener extends EventListener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onNPCDeath(NPCDeathEvent ev) {
         LuaEvent lev = buildEvent(ev);
-        lev.registerLinkedField("exp", new LinkedField<LuaNPC>() {
-            @Override
-            public void update(LuaValue val) {
-                ev.setDroppedExp(val.checkint());
-            }
-
-            @Override
-            public LuaValue query() {
-                return LuaNumber.valueOf(ev.getDroppedExp());
-            }
-        });
+        lev.registerLinkedField("exp",
+                val -> ev.setDroppedExp(val.checkint()),
+                () -> LuaNumber.valueOf(ev.getDroppedExp()));
+        // TODO: Drops
         lib.callEvent("NPCDeath", lev);
     }
 
@@ -169,18 +146,11 @@ public class NPCEventListener extends EventListener {
     @EventHandler(priority = EventPriority.LOW)
     public void onNPCPush(NPCPushEvent ev) {
         LuaEvent lev = buildEvent(ev);
-        lev.registerLinkedField("collisionVector", new LinkedField<LuaNPC>() {
-            @Override
-            public void update(LuaValue val) {
-                ev.setCollisionVector(((LuaVector) val.checktable())
-                        .getVector());
-            }
-
-            @Override
-            public LuaValue query() {
-                return new LuaVector(ev.getCollisionVector());
-            }
-        });
+        lev.registerLinkedField("collisionVector",
+                val -> ev.setCollisionVector(
+                        TypeUtils.checkOf(val, LuaVector.class)
+                                .getVector()),
+                () -> new LuaVector(ev.getCollisionVector()));
         lib.callEvent("NPCPush", lev);
     }
 
@@ -208,17 +178,9 @@ public class NPCEventListener extends EventListener {
     @EventHandler(priority = EventPriority.LOW)
     public void onNPCSpeech(NPCSpeechEvent ev) {
         LuaEvent lev = buildEvent(ev);
-        lev.registerLinkedField("vocalChord", new LinkedField<LuaNPC>() {
-            @Override
-            public void update(LuaValue val) {
-                ev.setVocalChord(val.checkjstring());
-            }
-
-            @Override
-            public LuaValue query() {
-                return LuaString.valueOf(ev.getVocalChordName());
-            }
-        });
+        lev.registerLinkedField("vocalChord",
+                val -> ev.setVocalChord(val.checkjstring()),
+                () -> LuaString.valueOf(ev.getVocalChordName()));
         lib.callEvent("NPCSpeech", lev);
     }
 

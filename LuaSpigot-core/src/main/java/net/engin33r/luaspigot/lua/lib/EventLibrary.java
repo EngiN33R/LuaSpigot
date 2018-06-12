@@ -3,7 +3,7 @@ package net.engin33r.luaspigot.lua.lib;
 import net.engin33r.luaspigot.EventListener;
 import net.engin33r.luaspigot.lua.Library;
 import net.engin33r.luaspigot.lua.VarargBuilder;
-import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
+import net.engin33r.luaspigot.lua.annotation.LibraryFunctionDefinition;
 import net.engin33r.luaspigot.lua.type.LuaEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.*;
@@ -820,7 +820,7 @@ public class EventLibrary extends Library {
         return "event";
     }
 
-    @LibFunctionDef(name = "addHandler")
+    @LibraryFunctionDefinition
     public Varargs addHandler(Varargs args) {
         String eventName = args.checkjstring(1);
         LuaFunction func = args.checkfunction(2);
@@ -834,7 +834,7 @@ public class EventLibrary extends Library {
         return NIL;
     }
 
-    @LibFunctionDef(name = "removeHandler")
+    @LibraryFunctionDefinition
     public Varargs removeHandler(Varargs args) {
         String eventName = args.checkjstring(1);
         LuaFunction func = args.checkfunction(2);
@@ -847,14 +847,14 @@ public class EventLibrary extends Library {
         return NIL;
     }
 
-    @LibFunctionDef(name = "clearHandlers")
+    @LibraryFunctionDefinition
     public Varargs clearHandlers(Varargs args) {
         String eventName = args.checkjstring(1);
         handlers.remove(eventName);
         return NIL;
     }
 
-    @LibFunctionDef(name = "call")
+    @LibraryFunctionDefinition
     public Varargs call(Varargs args) {
         String eventName = args.checkjstring(1);
         LuaTable tbl = args.checktable(2);

@@ -11,6 +11,6 @@ import static java.lang.annotation.ElementType.METHOD;
  */
 @Target(value=METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MethodDef {
-    String value();
+public @interface MethodDefinition {
+    String value() default "";
 }

@@ -2,8 +2,8 @@ package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.TypeUtils;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import org.bukkit.Location;
 import org.luaj.vm2.LuaNumber;
 import org.luaj.vm2.LuaValue;
@@ -39,14 +39,14 @@ public class LuaLocation extends WrapperType<Location> {
                 + loc.getPitch() + "," + loc.getYaw() + ")";
     }
 
-    @MethodDef("getBlock")
+    @MethodDefinition("getBlock")
     public Varargs getBlock(Varargs args) {
         return new LuaBlock(getHandle());
     }
 
-    @MethodDef("distance")
+    @MethodDefinition("distance")
     public Varargs distance(Varargs args) {
-        TypeValidator.validate(args.checktable(1), "location");
+        TypeUtils.validate(args.checktable(1), "location");
         Location loc2 = ((LuaLocation) args.checktable(1)).getHandle();
         return LuaNumber.valueOf(getHandle().distance(loc2));
     }
@@ -58,7 +58,7 @@ public class LuaLocation extends WrapperType<Location> {
 
         @Override
         public void update(LuaValue val) {
-            TypeValidator.validate(val.checktable(), "world");
+            TypeUtils.validate(val.checktable(), "world");
             getHandle().setWorld(((LuaWorld) val.checktable()).getHandle());
         }
 

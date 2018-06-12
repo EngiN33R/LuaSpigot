@@ -7,8 +7,8 @@ import net.citizensnpcs.api.trait.Trait;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.TableUtils;
 import net.engin33r.luaspigot.lua.WrapperType;
-import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.annotation.DynamicFieldDefinition;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import net.engin33r.luaspigot.lua.type.LuaEntity;
 import net.engin33r.luaspigot.lua.type.LuaLocation;
 import net.engin33r.luaspigot.lua.type.util.LuaUUID;
@@ -30,7 +30,7 @@ public class LuaNPC extends WrapperType<NPC> {
 
         registerField("uuid", new LuaUUID(npc.getUniqueId()));
         registerField("fullName", LuaString.valueOf(npc.getFullName()));
-        registerLinkedField("name", new NameField(this));
+        registerLinkedField("value", new NameField(this));
         registerLinkedField("flyable", new FlyableField(this));
         registerLinkedField("protected", new ProtectedField(this));
     }
@@ -56,46 +56,46 @@ public class LuaNPC extends WrapperType<NPC> {
                 .getUniqueId() + ")";
     }
 
-    @DynFieldDef("id")
+    @DynamicFieldDefinition("id")
     public LuaValue getID() {
         return LuaNumber.valueOf(getHandle().getId());
     }
 
-    @DynFieldDef("entity")
+    @DynamicFieldDefinition("entity")
     public LuaValue getEntity() {
         return new LuaEntity(getHandle().getEntity());
     }
 
-    @DynFieldDef("traits")
+    @DynamicFieldDefinition("traits")
     public LuaValue getTraits() {
         return TableUtils.tableFrom(getHandle().getTraits(), trait ->
                 LuaString.valueOf(CitizensAPI.getTraitFactory().getTrait
                         (trait.getClass()).getName()));
     }
 
-    @DynFieldDef("spawned")
+    @DynamicFieldDefinition("spawned")
     public LuaValue getSpawned() {
         return LuaBoolean.valueOf(getHandle().isSpawned());
     }
 
-    @DynFieldDef("lastLocation")
+    @DynamicFieldDefinition("lastLocation")
     public LuaValue getLastLocation() {
         return new LuaLocation(getHandle().getStoredLocation());
     }
 
-    @MethodDef("spawn")
+    @MethodDefinition("spawn")
     public Varargs spawn(Varargs args) {
         return LuaBoolean.valueOf(getHandle().spawn(((LuaLocation) args
                 .checktable(1)).getHandle()));
     }
 
-    @MethodDef("despawn")
+    @MethodDefinition("despawn")
     public Varargs despawn(Varargs args) {
         return LuaBoolean.valueOf(getHandle().despawn(DespawnReason.valueOf
                 (args.optjstring(1, "PLUGIN"))));
     }
 
-    @MethodDef("teleport")
+    @MethodDefinition("teleport")
     public Varargs teleport(Varargs args) {
         getHandle().teleport(((LuaLocation) args.checktable(1)).getHandle(),
                 PlayerTeleportEvent.TeleportCause.valueOf(
@@ -103,28 +103,28 @@ public class LuaNPC extends WrapperType<NPC> {
         return NIL;
     }
 
-    @MethodDef("face")
+    @MethodDefinition("face")
     public Varargs face(Varargs args) {
         getHandle().faceLocation(
                 ((LuaLocation) args.checktable(1)).getHandle());
         return NIL;
     }
 
-    @MethodDef("setEntityType")
+    @MethodDefinition("setEntityType")
     public Varargs setEntityType(Varargs args) {
         getHandle().setBukkitEntityType(
                 EntityType.valueOf(args.checkjstring(1)));
         return NIL;
     }
 
-    @MethodDef("addTrait")
+    @MethodDefinition("addTrait")
     public Varargs addTrait(Varargs args) {
         getHandle().addTrait(
                 CitizensAPI.getTraitFactory().getTrait(args.checkjstring(1)));
         return NIL;
     }
 
-    @MethodDef("removeTrait")
+    @MethodDefinition("removeTrait")
     public Varargs removeTrait(Varargs args) {
         getHandle().removeTrait(
                 CitizensAPI.getTraitFactory().getTrait(args.checkjstring(1))
@@ -132,14 +132,14 @@ public class LuaNPC extends WrapperType<NPC> {
         return NIL;
     }
 
-    @MethodDef("hasTrait")
+    @MethodDefinition("hasTrait")
     public Varargs hasTrait(Varargs args) {
         Trait t = CitizensAPI.getTraitFactory().getTrait(args.checkjstring(1));
         if (t == null) return FALSE;
         return LuaBoolean.valueOf(getHandle().hasTrait(t.getClass()));
     }
 
-    @MethodDef("getTrait")
+    @MethodDefinition("getTrait")
     public Varargs getTrait(Varargs args) {
         String name = args.checkjstring(1);
 

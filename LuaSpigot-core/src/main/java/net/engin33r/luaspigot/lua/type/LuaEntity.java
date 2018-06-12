@@ -2,9 +2,9 @@ package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.TypeUtils;
+import net.engin33r.luaspigot.lua.annotation.DynamicFieldDefinition;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -38,12 +38,12 @@ public class LuaEntity extends WrapperType<Entity> {
                 + getHandle().getUniqueId().toString() + ")";
     }
 
-    @DynFieldDef("name")
+    @DynamicFieldDefinition("value")
     public LuaValue getEName() {
         return LuaValue.valueOf(getHandle().getName());
     }
 
-    @MethodDef("teleport")
+    @MethodDefinition("teleport")
     public Varargs teleport(Varargs args) {
         if (args.narg() == 1) {
             LuaTable tbl = args.checktable(1);
@@ -70,7 +70,7 @@ public class LuaEntity extends WrapperType<Entity> {
     private class LocationField extends LinkedField<LuaEntity> {
         @Override
         public void update(LuaValue val) {
-            TypeValidator.validate(val.checktable(), "location");
+            TypeUtils.validate(val.checktable(), "location");
             getHandle().teleport(((LuaLocation) val.checktable()).getHandle());
         }
 

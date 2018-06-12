@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.METHOD;
 
 /**
- * Annotation for quick registration of dynamic fields.
+ * Annotation for quick registration of metamethods.
  */
 @Target(value=METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DynFieldDef {
+public @interface MetatableMethodDefinition {
     String value();
 }

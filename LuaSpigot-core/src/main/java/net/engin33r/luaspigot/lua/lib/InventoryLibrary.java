@@ -1,7 +1,7 @@
 package net.engin33r.luaspigot.lua.lib;
 
 import net.engin33r.luaspigot.lua.Library;
-import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
+import net.engin33r.luaspigot.lua.annotation.LibraryFunctionDefinition;
 import net.engin33r.luaspigot.lua.type.LuaEvent;
 import net.engin33r.luaspigot.lua.type.LuaInventoryView;
 import org.bukkit.Bukkit;
@@ -80,7 +80,7 @@ public class InventoryLibrary extends Library {
         return "inventory";
     }
 
-    @LibFunctionDef(name = "create")
+    @LibraryFunctionDefinition(value = "create")
     public Varargs create(Varargs arg) {
         String title = arg.checkjstring(1);
         int size = arg.checkint(2);

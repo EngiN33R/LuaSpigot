@@ -24,7 +24,7 @@ public class LuaNPCTrait extends WrapperType<Trait> {
         public void setName(String name) {
             try {
                 Field f = this.getClass().getSuperclass()
-                        .getDeclaredField("name");
+                        .getDeclaredField("value");
                 f.setAccessible(true);
                 f.set(this, name);
                 f.setAccessible(false);

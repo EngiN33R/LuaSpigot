@@ -1,15 +1,12 @@
 package net.engin33r.luaspigot.lua.type.event;
 
-import net.engin33r.luaspigot.lua.DynamicField;
-import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.Method;
+import net.engin33r.luaspigot.lua.*;
 import net.engin33r.luaspigot.lua.type.*;
 import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
@@ -17,163 +14,104 @@ import org.luaj.vm2.*;
 
 import java.net.InetAddress;
 
-import static org.luaj.vm2.LuaValue.NIL;
-
 public class LuaPlayerEventFactory {
     public static void build(PlayerEvent ev, LuaEvent lev) {
         LuaPlayer lpl = new LuaPlayer(ev.getPlayer());
         lev.registerField("player", lpl);
 
         if (ev instanceof AsyncPlayerChatEvent) {
-            lev.registerLinkedField("format", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((AsyncPlayerChatEvent) ev).setFormat(val.checkjstring());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((AsyncPlayerChatEvent) ev)
-                            .getFormat());
-                }
-            });
-
-            lev.registerLinkedField("message", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((AsyncPlayerChatEvent) ev).setMessage(val.checkjstring());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((AsyncPlayerChatEvent) ev)
-                            .getMessage());
-                }
-            });
-
-            lev.registerDynamicField("recipients",
-                    new DynamicField<LuaEvent>(lev) {
-                        @Override
-                        public LuaValue query() {
-                            LuaTable tbl = LuaTable.tableOf();
-                            for (Player p : ((AsyncPlayerChatEvent) ev)
-                                    .getRecipients()) {
-                                tbl.set(tbl.length()+1, new LuaPlayer(p));
-                            }
-                            return tbl;
-                        }
-                    });
+            AsyncPlayerChatEvent cev = (AsyncPlayerChatEvent) ev;
+            lev.registerLinkedField("format",
+                    val -> cev.setFormat(val.checkjstring()),
+                    () -> LuaString.valueOf(cev.getFormat()));
+            lev.registerLinkedField("message",
+                    val -> cev.setMessage(val.checkjstring()),
+                    () -> LuaString.valueOf(cev.getMessage()));
+            lev.registerField("recipients",
+                    TableUtils.tableFrom(cev.getRecipients(), LuaPlayer::new));
         }
 
         if (ev instanceof PlayerAdvancementDoneEvent) {
+            PlayerAdvancementDoneEvent cev = (PlayerAdvancementDoneEvent) ev;
             lev.registerField("advancement", LuaString.valueOf(
-                    ((PlayerAdvancementDoneEvent) ev).getAdvancement()
-                            .toString()));
+                    cev.getAdvancement().toString()));
         }
 
         if (ev instanceof PlayerAnimationEvent) {
+            PlayerAnimationEvent cev = (PlayerAnimationEvent) ev;
             lev.registerField("animation", LuaString.valueOf(
-                    ((PlayerAnimationEvent) ev).getAnimationType().toString()));
+                    cev.getAnimationType().toString()));
         }
 
         if (ev instanceof PlayerBedEnterEvent) {
-            lev.registerField("bed", new LuaBlock(((PlayerBedEnterEvent) ev)
-                    .getBed()));
+            PlayerBedEnterEvent cev = (PlayerBedEnterEvent) ev;
+            lev.registerField("bed", new LuaBlock(cev.getBed()));
         }
 
         if (ev instanceof PlayerBedLeaveEvent) {
-            lev.registerField("bed", new LuaBlock(((PlayerBedLeaveEvent) ev)
-                    .getBed()));
+            PlayerBedLeaveEvent cev = (PlayerBedLeaveEvent) ev;
+            lev.registerField("bed", new LuaBlock(cev.getBed()));
         }
 
         if (ev instanceof PlayerBucketEvent) {
+            PlayerBucketEvent cev = (PlayerBucketEvent) ev;
             lev.registerField("block", new LuaBlock(
-                    ((PlayerBucketEvent) ev).getBlockClicked()));
+                    cev.getBlockClicked()));
             lev.registerField("face", LuaString.valueOf(
-                    ((PlayerBucketEvent) ev).getBlockFace().toString()));
+                    cev.getBlockFace().toString()));
             lev.registerField("bucket", LuaString.valueOf(
-                    ((PlayerBucketEvent) ev).getBucket().toString()));
+                    cev.getBucket().toString()));
 
-            lev.registerLinkedField("item", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerBucketEvent) ev).setItemStack(((LuaItem)
-                            val.checktable()).getHandle());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return new LuaItem(((PlayerBucketEvent) ev).getItemStack());
-                }
-            });
+            lev.registerLinkedField("item",
+                    val -> cev.setItemStack(
+                            TypeUtils.handleOf(val, LuaItem.class)),
+                    () -> new LuaItem(cev.getItemStack()));
         }
 
         if (ev instanceof PlayerChangedWorldEvent) {
-            LuaWorld from = new LuaWorld(((PlayerChangedWorldEvent) ev)
-                    .getFrom());
-            lev.registerField("from", from);
+            PlayerChangedWorldEvent cev = (PlayerChangedWorldEvent) ev;
+            lev.registerField("from", new LuaWorld(cev.getFrom()));
         }
 
         if (ev instanceof PlayerChannelEvent) {
-            lev.registerField("channel", LuaString.valueOf(
-                    ((PlayerChannelEvent) ev).getChannel()));
+            PlayerChannelEvent cev = (PlayerChannelEvent) ev;
+            lev.registerField("channel", LuaString.valueOf(cev.getChannel()));
         }
 
         if (ev instanceof PlayerChatTabCompleteEvent) {
+            PlayerChatTabCompleteEvent cev = (PlayerChatTabCompleteEvent) ev;
             lev.registerField("message", LuaString.valueOf(
-                    ((PlayerChatTabCompleteEvent) ev).getChatMessage()));
-            lev.registerField("token", LuaString.valueOf(
-                    ((PlayerChatTabCompleteEvent) ev).getLastToken()));
-
-            LuaTable comps = LuaTable.tableOf();
-            for (String comp : ((PlayerChatTabCompleteEvent) ev)
-                    .getTabCompletions()) {
-                comps.set(comps.length()+1, LuaString.valueOf(comp));
-            }
-            lev.registerField("completions", comps);
+                    cev.getChatMessage()));
+            lev.registerField("token", LuaString.valueOf(cev.getLastToken()));
+            lev.registerField("completions",
+                    TableUtils.tableFrom(cev.getTabCompletions(),
+                            LuaString::valueOf));
         }
 
         if (ev instanceof PlayerCommandPreprocessEvent) {
-            lev.registerLinkedField("message", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerCommandPreprocessEvent) ev).setMessage(
-                            val.checkjstring());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((PlayerCommandPreprocessEvent) ev)
-                            .getMessage());
-                }
-            });
-            lev.registerLinkedField("player", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    OfflinePlayer pl = ((LuaPlayer) val.checktable())
-                            .getHandle();
-                    if (pl.getPlayer() == null) return;
-
-                    ((PlayerCommandPreprocessEvent) ev).setPlayer(pl
-                            .getPlayer());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return lpl;
-                }
-            });
+            PlayerCommandPreprocessEvent cev = (PlayerCommandPreprocessEvent) ev;
+            lev.registerLinkedField("message",
+                    val -> cev.setMessage(val.checkjstring()),
+                    () -> LuaString.valueOf(cev.getMessage()));
+            lev.registerLinkedField("player",
+                    val -> {
+                        OfflinePlayer pl = TypeUtils.handleOf(val,
+                                LuaPlayer.class);
+                        if (pl != null) {
+                            cev.setPlayer(pl.getPlayer());
+                        }
+                    },
+                    () -> lpl);
         }
 
         if (ev instanceof PlayerDropItemEvent) {
-            lev.registerField("item", new LuaItem(
-                    ((PlayerDropItemEvent) ev).getItemDrop()));
+            PlayerDropItemEvent cev = (PlayerDropItemEvent) ev;
+            lev.registerField("item", new LuaItem(cev.getItemDrop()));
         }
 
         if (ev instanceof PlayerEditBookEvent) {
             PlayerEditBookEvent cev = (PlayerEditBookEvent) ev;
-            lev.registerField("newBook", new LuaBook(
-                    cev.getNewBookMeta()));
+            lev.registerField("newBook", new LuaBook(cev.getNewBookMeta()));
             lev.registerField("oldBook", new LuaBook(
                     cev.getPreviousBookMeta()));
         }
@@ -181,400 +119,253 @@ public class LuaPlayerEventFactory {
         if (ev instanceof PlayerEggThrowEvent) {
             PlayerEggThrowEvent cev = (PlayerEggThrowEvent) ev;
             lev.registerLinkedField("type",
-                    val -> cev.setHatchingType(EntityType.valueOf(val.checkjstring())),
-                    () -> LuaString.valueOf(cev.getHatchingType().name())
-            );
+                    val -> cev.setHatchingType(
+                            EntityType.valueOf(val.checkjstring())),
+                    () -> LuaString.valueOf(cev.getHatchingType().name()));
             lev.registerLinkedField("hatching",
                     val -> cev.setHatching(val.checkboolean()),
-                    () -> LuaBoolean.valueOf(cev.isHatching())
-            );
+                    () -> LuaBoolean.valueOf(cev.isHatching()));
             lev.registerLinkedField("numHatches",
                     val -> cev.setNumHatches((byte) val.checkint()),
-                    () -> LuaNumber.valueOf(cev.getNumHatches())
-            );
+                    () -> LuaNumber.valueOf(cev.getNumHatches()));
         }
 
         if (ev instanceof PlayerExpChangeEvent) {
-            lev.registerLinkedField("amount", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerExpChangeEvent) ev).setAmount(val.checkint());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaNumber.valueOf(((PlayerExpChangeEvent) ev)
-                            .getAmount());
-                }
-            });
+            PlayerExpChangeEvent cev = (PlayerExpChangeEvent) ev;
+            lev.registerLinkedField("amount",
+                    val -> cev.setAmount(val.checkint()),
+                    () -> LuaNumber.valueOf(cev.getAmount()));
         }
 
         if (ev instanceof PlayerFishEvent) {
-            Entity caught = ((PlayerFishEvent) ev).getCaught();
+            PlayerFishEvent cev = (PlayerFishEvent) ev;
+            Entity caught = cev.getCaught();
             if (caught != null)
                 lev.registerField("caught", new LuaEntity(caught));
             lev.registerField("state", LuaString.valueOf(
-                    ((PlayerFishEvent) ev).getState().toString()));
+                    cev.getState().toString()));
 
-            lev.registerLinkedField("exp", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerFishEvent) ev).setExpToDrop(val.checkint());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaNumber.valueOf(((PlayerFishEvent) ev)
-                            .getExpToDrop());
-                }
-            });
+            lev.registerLinkedField("exp",
+                    val -> cev.setExpToDrop(val.checkint()),
+                    () -> LuaNumber.valueOf(cev.getExpToDrop()));
         }
 
         if (ev instanceof PlayerGameModeChangeEvent) {
+            PlayerGameModeChangeEvent cev = (PlayerGameModeChangeEvent) ev;
             lev.registerField("gamemode", LuaString.valueOf(
-                    ((PlayerGameModeChangeEvent) ev).getNewGameMode()
-                            .toString()));
+                    cev.getNewGameMode().toString()));
         }
 
         if (ev instanceof PlayerInteractEvent) {
+            PlayerInteractEvent cev = (PlayerInteractEvent) ev;
             lev.registerField("action", LuaString.valueOf(
-                    ((PlayerInteractEvent) ev).getAction().toString()));
-            Block block = ((PlayerInteractEvent) ev).getClickedBlock();
+                    cev.getAction().toString()));
+            Block block = cev.getClickedBlock();
             if (block != null) {
                 lev.registerField("block", new LuaBlock(block));
                 lev.registerField("face", LuaString.valueOf(
-                        ((PlayerInteractEvent) ev).getBlockFace().toString()));
+                        cev.getBlockFace().toString()));
             }
-            ItemStack item = ((PlayerInteractEvent) ev).getItem();
+            ItemStack item = cev.getItem();
             if (item != null) lev.registerField("item", new LuaItem(item));
 
             lev.registerField("hasBlock", LuaBoolean.valueOf(
-                    ((PlayerInteractEvent) ev).hasBlock()));
+                    cev.hasBlock()));
             lev.registerField("hasItem", LuaBoolean.valueOf(
-                    ((PlayerInteractEvent) ev).hasItem()));
+                    cev.hasItem()));
             lev.registerField("blockPlaced", LuaBoolean.valueOf(
-                    ((PlayerInteractEvent) ev).isBlockInHand()));
+                    cev.isBlockInHand()));
             lev.registerField("hand", LuaString.valueOf(
-                    ((PlayerInteractEvent) ev).getHand().name()));
+                    cev.getHand().name()));
 
-            lev.registerLinkedField("blockAction", new LinkedField<LuaEvent>() {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerInteractEvent) ev).setUseInteractedBlock(
-                            Event.Result.valueOf(val.checkjstring()));
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((PlayerInteractEvent) ev)
-                            .useInteractedBlock().toString());
-                }
-            });
-            lev.registerLinkedField("itemAction", new LinkedField<LuaEvent>() {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerInteractEvent) ev).setUseItemInHand(
-                            Event.Result.valueOf(val.checkjstring()));
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((PlayerInteractEvent) ev)
-                            .useItemInHand().toString());
-                }
-            });
+            lev.registerLinkedField("blockAction",
+                    val -> cev.setUseInteractedBlock(
+                            TypeUtils.getEnum(val, Event.Result.class)),
+                    () -> TypeUtils.checkEnum(cev.useInteractedBlock()));
+            lev.registerLinkedField("itemAction",
+                    val -> cev.setUseItemInHand(
+                            TypeUtils.getEnum(val, Event.Result.class)),
+                    () -> TypeUtils.checkEnum(cev.useItemInHand()));
         }
 
         if (ev instanceof PlayerInteractAtEntityEvent) {
-            lev.registerField("pos", new LuaVector(
-                    ((PlayerInteractAtEntityEvent) ev).getClickedPosition()));
+            PlayerInteractAtEntityEvent cev = (PlayerInteractAtEntityEvent) ev;
+            lev.registerField("pos", new LuaVector(cev.getClickedPosition()));
         }
 
         if (ev instanceof PlayerInteractEntityEvent) {
-            lev.registerField("entity", new LuaEntity(
-                    ((PlayerInteractEntityEvent) ev).getRightClicked()));
+            PlayerInteractEntityEvent cev = (PlayerInteractEntityEvent) ev;
+            lev.registerField("entity", new LuaEntity(cev.getRightClicked()));
         }
 
         if (ev instanceof PlayerItemBreakEvent) {
-            lev.registerField("item", new LuaItem(((PlayerItemBreakEvent) ev)
-                    .getBrokenItem()));
+            PlayerItemBreakEvent cev = (PlayerItemBreakEvent) ev;
+            lev.registerField("item", new LuaItem(cev.getBrokenItem()));
         }
 
         if (ev instanceof PlayerItemConsumeEvent) {
-            lev.registerLinkedField("item", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerItemConsumeEvent) ev).setItem(
-                            ((LuaItem) val.checktable()).getHandle());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return new LuaItem(((PlayerItemConsumeEvent) ev).getItem());
-                }
-            });
+            PlayerItemConsumeEvent cev = (PlayerItemConsumeEvent) ev;
+            lev.registerLinkedField("exp",
+                    val -> cev.setItem(TypeUtils.handleOf(val, LuaItem.class)),
+                    () -> new LuaItem(cev.getItem()));
         }
 
         if (ev instanceof PlayerItemHeldEvent) {
+            PlayerItemHeldEvent cev = (PlayerItemHeldEvent) ev;
             lev.registerField("previous", LuaNumber.valueOf(
-                    ((PlayerItemHeldEvent) ev).getPreviousSlot()));
+                    cev.getPreviousSlot()));
             lev.registerField("new", LuaNumber.valueOf(
-                    ((PlayerItemHeldEvent) ev).getNewSlot()));
+                    cev.getNewSlot()));
         }
 
         if (ev instanceof PlayerJoinEvent) {
-            lev.registerLinkedField("message", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerJoinEvent) ev).setJoinMessage(val.checkjstring());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((PlayerJoinEvent) ev)
-                            .getJoinMessage());
-                }
-            });
+            PlayerJoinEvent cev = (PlayerJoinEvent) ev;
+            lev.registerLinkedField("message",
+                    val -> cev.setJoinMessage(val.checkjstring()),
+                    () -> LuaString.valueOf(cev.getJoinMessage()));
         }
 
         if (ev instanceof PlayerKickEvent) {
-            lev.registerLinkedField("message", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerKickEvent) ev).setLeaveMessage(val.checkjstring());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((PlayerKickEvent) ev)
-                            .getLeaveMessage());
-                }
-            });
-            lev.registerLinkedField("reason", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerKickEvent) ev).setReason(val.checkjstring());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((PlayerKickEvent) ev)
-                            .getReason());
-                }
-            });
+            PlayerKickEvent cev = (PlayerKickEvent) ev;
+            lev.registerLinkedField("message",
+                    val -> cev.setLeaveMessage(val.checkjstring()),
+                    () -> LuaString.valueOf(cev.getLeaveMessage()));
+            lev.registerLinkedField("message",
+                    val -> cev.setReason(val.checkjstring()),
+                    () -> LuaString.valueOf(cev.getReason()));
         }
 
         if (ev instanceof PlayerLevelChangeEvent) {
-            lev.registerField("new", LuaNumber.valueOf(
-                    ((PlayerLevelChangeEvent) ev).getNewLevel()));
-            lev.registerField("old", LuaNumber.valueOf(
-                    ((PlayerLevelChangeEvent) ev).getOldLevel()));
+            PlayerLevelChangeEvent cev = (PlayerLevelChangeEvent) ev;
+            lev.registerField("new", LuaNumber.valueOf(cev.getNewLevel()));
+            lev.registerField("old", LuaNumber.valueOf(cev.getOldLevel()));
         }
 
         if (ev instanceof PlayerLoginEvent) {
-            InetAddress addr = ((PlayerLoginEvent) ev).getAddress();
+            PlayerLoginEvent cev = (PlayerLoginEvent) ev;
+            InetAddress addr = cev.getAddress();
             if (addr != null)
                 lev.registerField("address", LuaString.valueOf(addr
                         .getCanonicalHostName()));
 
             lev.registerField("hostname", LuaString.valueOf(
-                    ((PlayerLoginEvent) ev).getHostname()));
+                    cev.getHostname()));
 
-            lev.registerLinkedField("result", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerLoginEvent) ev).setResult(PlayerLoginEvent.Result
-                            .valueOf(val.checkjstring().toUpperCase()));
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((PlayerLoginEvent) ev)
-                            .getResult().toString());
-                }
-            });
-            lev.registerLinkedField("message", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerLoginEvent) ev).setKickMessage(val
-                            .checkjstring());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((PlayerLoginEvent) ev)
-                            .getKickMessage());
-                }
-            });
-            lev.registerMethod("allow", new Method<LuaEvent>(lev) {
-                @Override
-                public Varargs call(Varargs args) {
-                    ((PlayerLoginEvent) ev).allow();
-                    return NIL;
-                }
-            });
-            lev.registerMethod("disallow", new Method<LuaEvent>(lev) {
-                @Override
-                public Varargs call(Varargs args) {
-                    ((PlayerLoginEvent) ev).disallow(
-                            PlayerLoginEvent.Result
-                                    .valueOf(args.checkjstring(1)),
-                            args.optjstring(2, ""));
-                    return NIL;
-                }
+            lev.registerLinkedField("result",
+                    val -> cev.setResult(
+                            TypeUtils.getEnum(val,
+                                    PlayerLoginEvent.Result.class)),
+                    () -> TypeUtils.checkEnum(cev.getResult()));
+            lev.registerLinkedField("message",
+                    val -> cev.setKickMessage(val.checkjstring()),
+                    () -> LuaString.valueOf(cev.getKickMessage()));
+            lev.registerMethod("allow", cev::allow);
+            lev.registerMethod("disallow", (args) -> {
+                cev.disallow(
+                        TypeUtils.getEnum(args.checkstring(1),
+                                PlayerLoginEvent.Result.class),
+                        args.optjstring(2, ""));
             });
         }
 
         if (ev instanceof PlayerMoveEvent) {
-            lev.registerLinkedField("from", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerMoveEvent) ev).setFrom(((LuaLocation) val
-                            .checktable()).getHandle());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return new LuaLocation(((PlayerMoveEvent) ev).getFrom());
-                }
-            });
-            lev.registerLinkedField("to", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerMoveEvent) ev).setTo(((LuaLocation) val
-                            .checktable()).getHandle());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return new LuaLocation(((PlayerMoveEvent) ev).getTo());
-                }
-            });
+            PlayerMoveEvent cev = (PlayerMoveEvent) ev;
+            lev.registerLinkedField("from",
+                    val -> cev.setFrom(
+                            TypeUtils.handleOf(val, LuaLocation.class)),
+                    () -> new LuaLocation(cev.getFrom()));
+            lev.registerLinkedField("to",
+                    val -> cev.setTo(
+                            TypeUtils.handleOf(val, LuaLocation.class)),
+                    () -> new LuaLocation(cev.getTo()));
         }
 
         if (ev instanceof PlayerPortalEvent) {
-            lev.registerField("from", new LuaLocation(
-                    ((PlayerPortalEvent) ev).getFrom()));
-            lev.registerField("to", new LuaLocation(
-                    ((PlayerPortalEvent) ev).getTo()));
+            PlayerPortalEvent cev = (PlayerPortalEvent) ev;
+            lev.registerLinkedField("from",
+                    val -> cev.setFrom(
+                            TypeUtils.handleOf(val, LuaLocation.class)),
+                    () -> new LuaLocation(cev.getFrom()));
+            lev.registerLinkedField("to",
+                    val -> cev.setTo(
+                            TypeUtils.handleOf(val, LuaLocation.class)),
+                    () -> new LuaLocation(cev.getTo()));
         }
 
         if (ev instanceof PlayerQuitEvent) {
-            lev.registerLinkedField("message", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerQuitEvent) ev).setQuitMessage(val
-                            .checkjstring());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((PlayerQuitEvent) ev)
-                            .getQuitMessage());
-                }
-            });
+            PlayerQuitEvent cev = (PlayerQuitEvent) ev;
+            lev.registerLinkedField("message",
+                    val -> cev.setQuitMessage(val.checkjstring()),
+                    () -> LuaString.valueOf(cev.getQuitMessage()));
         }
 
         if (ev instanceof PlayerRespawnEvent) {
-            lev.registerLinkedField("location", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerRespawnEvent) ev).setRespawnLocation(
-                            ((LuaLocation) val.checktable()).getHandle());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return new LuaLocation(((PlayerRespawnEvent) ev)
-                            .getRespawnLocation());
-                }
-            });
-            lev.registerField("bed", LuaBoolean.valueOf(
-                    ((PlayerRespawnEvent) ev).isBedSpawn()));
+            PlayerRespawnEvent cev = (PlayerRespawnEvent) ev;
+            lev.registerLinkedField("from",
+                    val -> cev.setRespawnLocation(
+                            TypeUtils.handleOf(val, LuaLocation.class)),
+                    () -> new LuaLocation(cev.getRespawnLocation()));
+            lev.registerField("bed", LuaBoolean.valueOf(cev.isBedSpawn()));
         }
 
         if (ev instanceof PlayerShearEntityEvent) {
-            lev.registerField("entity", new LuaEntity(
-                    ((PlayerShearEntityEvent) ev).getEntity()));
+            PlayerShearEntityEvent cev = (PlayerShearEntityEvent) ev;
+            lev.registerField("entity", new LuaEntity(cev.getEntity()));
         }
 
         if (ev instanceof PlayerStatisticIncrementEvent) {
+            PlayerStatisticIncrementEvent cev =
+                    (PlayerStatisticIncrementEvent) ev;
             lev.registerField("stat", LuaString.valueOf(
-                    ((PlayerStatisticIncrementEvent) ev).getStatistic()
-                            .toString()));
-            if (((PlayerStatisticIncrementEvent) ev).getMaterial() != null)
+                    cev.getStatistic().toString()));
+            if (cev.getMaterial() != null)
                 lev.registerField("material", LuaString.valueOf(
                         ((PlayerStatisticIncrementEvent) ev).getMaterial()
                                 .toString()));
-            lev.registerField("new", LuaNumber.valueOf(
-                    ((PlayerStatisticIncrementEvent) ev).getNewValue()));
-            lev.registerField("previous", LuaNumber.valueOf(
-                    ((PlayerStatisticIncrementEvent) ev).getNewValue()));
+            lev.registerField("new", LuaNumber.valueOf(cev.getNewValue()));
+            lev.registerField("previous", LuaNumber.valueOf(cev.getNewValue()));
         }
 
         if (ev instanceof PlayerSwapHandItemsEvent) {
-            lev.registerLinkedField("main", new LinkedField<LuaEvent>() {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerSwapHandItemsEvent) ev).setMainHandItem(
-                            ((LuaItem) val.checktable()).getHandle());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return new LuaItem(((PlayerSwapHandItemsEvent) ev)
-                            .getMainHandItem());
-                }
-            });
-            lev.registerLinkedField("offhand", new LinkedField<LuaEvent>() {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerSwapHandItemsEvent) ev).setOffHandItem(
-                            ((LuaItem) val.checktable()).getHandle());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return new LuaItem(((PlayerSwapHandItemsEvent) ev)
-                            .getOffHandItem());
-                }
-            });
+            PlayerSwapHandItemsEvent cev = (PlayerSwapHandItemsEvent) ev;
+            lev.registerLinkedField("main",
+                    val -> cev.setMainHandItem(
+                            TypeUtils.handleOf(val, LuaItem.class)),
+                    () -> new LuaItem(cev.getMainHandItem()));
+            lev.registerLinkedField("offhand",
+                    val -> cev.setOffHandItem(
+                            TypeUtils.handleOf(val, LuaItem.class)),
+                    () -> new LuaItem(cev.getOffHandItem()));
         }
 
         if (ev instanceof PlayerTeleportEvent) {
+            PlayerTeleportEvent cev = (PlayerTeleportEvent) ev;
             lev.registerField("cause", LuaString.valueOf(
-                    ((PlayerTeleportEvent) ev).getCause().toString()));
+                    cev.getCause().toString()));
         }
 
         if (ev instanceof PlayerToggleFlightEvent) {
-            lev.registerField("flying", LuaBoolean.valueOf(
-                    ((PlayerToggleFlightEvent) ev).isFlying()));
+            PlayerToggleFlightEvent cev = (PlayerToggleFlightEvent) ev;
+            lev.registerField("flying", LuaBoolean.valueOf(cev.isFlying()));
         }
 
         if (ev instanceof PlayerToggleSneakEvent) {
-            lev.registerField("sneaking", LuaBoolean.valueOf(
-                    ((PlayerToggleSneakEvent) ev).isSneaking()));
+            PlayerToggleSneakEvent cev = (PlayerToggleSneakEvent) ev;
+            lev.registerField("sneaking", LuaBoolean.valueOf(cev.isSneaking()));
         }
 
         if (ev instanceof PlayerToggleSprintEvent) {
+            PlayerToggleSprintEvent cev = (PlayerToggleSprintEvent) ev;
             lev.registerField("sprinting", LuaBoolean.valueOf(
-                    ((PlayerToggleSprintEvent) ev).isSprinting()));
+                    cev.isSprinting()));
         }
 
         if (ev instanceof PlayerVelocityEvent) {
-            lev.registerLinkedField("velocity", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((PlayerVelocityEvent) ev).setVelocity(
-                            ((LuaVector) val.checktable()).getVector());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return new LuaVector(((PlayerVelocityEvent) ev)
-                            .getVelocity());
-                }
-            });
+            PlayerVelocityEvent cev = (PlayerVelocityEvent) ev;
+            lev.registerLinkedField("main",
+                    val -> cev.setVelocity(
+                            TypeUtils.handleOf(val, LuaVector.class)),
+                    () -> new LuaVector(cev.getVelocity()));
         }
     }
 }

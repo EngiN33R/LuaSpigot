@@ -1,7 +1,7 @@
 package net.engin33r.luaspigot.lua.lib;
 
 import net.engin33r.luaspigot.lua.Library;
-import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
+import net.engin33r.luaspigot.lua.annotation.LibraryFunctionDefinition;
 import net.engin33r.luaspigot.lua.type.db.LuaDB;
 import org.luaj.vm2.Varargs;
 
@@ -26,7 +26,7 @@ public class DatabaseLibrary extends Library {
         return "db";
     }
 
-    @LibFunctionDef(name = "connect")
+    @LibraryFunctionDefinition("connect")
     public Varargs connect(Varargs args) {
         try {
             Connection conn = DriverManager.getConnection("jdbc:"

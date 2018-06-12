@@ -7,11 +7,10 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.METHOD;
 
 /**
- * Annotation for quick registration of library functions.
+ * Annotation for quick registration of dynamic fields.
  */
 @Target(value=METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LibFunctionDef {
-    String name();
-    String module() default "";
+public @interface DynamicFieldDefinition {
+    String value();
 }

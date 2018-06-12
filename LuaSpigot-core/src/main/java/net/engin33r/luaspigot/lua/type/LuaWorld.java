@@ -1,7 +1,7 @@
 package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.WrapperType;
-import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
+import net.engin33r.luaspigot.lua.annotation.DynamicFieldDefinition;
 import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import org.bukkit.World;
 import org.luaj.vm2.LuaValue;
@@ -27,12 +27,12 @@ public class LuaWorld extends WrapperType<World> {
         return "world: " + w.getName() + " (" + w.getUID().toString() + ")";
     }
 
-    @DynFieldDef("name")
+    @DynamicFieldDefinition("value")
     public LuaValue getWName() {
         return LuaValue.valueOf(getHandle().getName());
     }
 
-    @DynFieldDef("uuid")
+    @DynamicFieldDefinition("uuid")
     public LuaValue getUUID() {
         return new LuaUUID(getHandle().getUID());
     }

@@ -1,8 +1,8 @@
 package net.engin33r.luaspigot.lua;
 
-import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
-import net.engin33r.luaspigot.lua.annotation.MetaMethodDef;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.annotation.DynamicFieldDefinition;
+import net.engin33r.luaspigot.lua.annotation.MetatableMethodDefinition;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -11,6 +11,8 @@ import org.luaj.vm2.lib.VarArgFunction;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Abstract class representing a weak Lua type (essentially a table) for
@@ -19,7 +21,8 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public abstract class WeakType extends LuaTable implements IWeakType {
-    private final Map<LuaValue, DynamicField> dynFields = new HashMap<>();
+    private final Map<LuaValue, net.engin33r.luaspigot.lua.DynamicField>
+            dynFields = new HashMap<>();
     private final Map<LuaValue, LinkedField> linkedFields = new HashMap<>();
 
     protected WeakType() {
@@ -27,28 +30,32 @@ public abstract class WeakType extends LuaTable implements IWeakType {
         this.setmetatable(getMetatable());
 
         final Class<? extends WeakType> clazz = this.getClass();
+
         for (java.lang.reflect.Method m : clazz.getDeclaredMethods()) {
-            DynFieldDef fieldAnn = m.getAnnotation(DynFieldDef.class);
-            if (fieldAnn != null) {
-                dynFields.put(LuaValue.valueOf(fieldAnn.value()),
-                        new DynamicField<WeakType>(this) {
-                            @Override
-                            public LuaValue query() {
-                                try {
-                                    return (LuaValue) m.invoke(WeakType.this);
-                                } catch (IllegalAccessException |
-                                        InvocationTargetException e) {
-                                    //error(e.getMessage());
-                                    e.printStackTrace();
-                                }
-                                return NIL;
-                            }
-                        });
+            if (m.isAnnotationPresent(DynamicFieldDefinition.class)) {
+                String name = m.getAnnotation(DynamicFieldDefinition.class)
+                        .value();
+                name = name.equals("") ? m.getName() : name;
+                dynFields.put(LuaValue.valueOf(name), new
+                        DynamicField<WeakType>(this) {
+                    @Override
+                    public LuaValue query() {
+                        try {
+                            return (LuaValue) m.invoke(WeakType.this);
+                        } catch (IllegalAccessException |
+                                InvocationTargetException e) {
+                            //error(e.getMessage());
+                            e.printStackTrace();
+                        }
+                        return NIL;
+                    }
+                });
             }
 
-            MethodDef methodAnn = m.getAnnotation(MethodDef.class);
-            if (methodAnn != null) {
-                registerField(methodAnn.value(), new VarArgFunction() {
+            if (m.isAnnotationPresent(MethodDefinition.class)) {
+                String name = m.getAnnotation(MethodDefinition.class).value();
+                name = name.equals("") ? m.getName() : name;
+                registerField(name, new VarArgFunction() {
                     @Override
                     public Varargs invoke(Varargs args) {
                         try {
@@ -63,9 +70,11 @@ public abstract class WeakType extends LuaTable implements IWeakType {
                 });
             }
 
-            MetaMethodDef mtMethodAnn = m.getAnnotation(MetaMethodDef.class);
-            if (mtMethodAnn != null) {
-                getMetatable().set(mtMethodAnn.value(), new VarArgFunction() {
+            if (m.isAnnotationPresent(MetatableMethodDefinition.class)) {
+                String name = m.getAnnotation(MetatableMethodDefinition
+                        .class).value();
+                name = name.equals("") ? m.getName() : name;
+                getMetatable().set(name, new VarArgFunction() {
                     @Override
                     public Varargs invoke(Varargs args) {
                         try {
@@ -94,12 +103,9 @@ public abstract class WeakType extends LuaTable implements IWeakType {
     @Override
     public LuaValue get(LuaValue key) {
         LuaValue i = index(key);
-        if (i != null)
-            return i;
-        if (dynFields.get(key) != null)
-            return dynFields.get(key).query();
-        if (linkedFields.get(key) != null)
-            return linkedFields.get(key).query();
+        if (i != null) return i;
+        if (dynFields.get(key) != null) return dynFields.get(key).query();
+        if (linkedFields.get(key) != null) return linkedFields.get(key).query();
         return super.get(key);
     }
 
@@ -118,6 +124,47 @@ public abstract class WeakType extends LuaTable implements IWeakType {
         this.set(name, method.getFunction());
     }
 
+    public void registerMethod(String name,
+                               java.util.function.Function<Varargs, Varargs>
+                                       func) {
+        this.set(name, (new Method<WeakType>(this) {
+            public Varargs call(Varargs arg) {
+                return func.apply(arg);
+            }
+        }).getFunction());
+    }
+
+    public void registerMethod(String name,
+                               java.util.function.Consumer<Varargs>
+                                       func) {
+        this.set(name, (new Method<WeakType>(this) {
+            public Varargs call(Varargs arg) {
+                func.accept(arg);
+                return NIL;
+            }
+        }).getFunction());
+    }
+
+    public void registerMethod(String name,
+                               java.util.function.Supplier<Varargs>
+                                       func) {
+        this.set(name, (new Method<WeakType>(this) {
+            public Varargs call(Varargs arg) {
+                return func.get();
+            }
+        }).getFunction());
+    }
+
+    public void registerMethod(String name,
+                               Runnable func) {
+        this.set(name, (new Method<WeakType>(this) {
+            public Varargs call(Varargs arg) {
+                func.run();
+                return NIL;
+            }
+        }).getFunction());
+    }
+
     public void registerField(String name, LuaValue field) {
         registerField(LuaValue.valueOf(name), field);
     }
@@ -130,15 +177,14 @@ public abstract class WeakType extends LuaTable implements IWeakType {
         registerDynamicField(LuaValue.valueOf(name), field);
     }
 
-    public void registerDynamicField(String name,
-                                     java.util.function.Supplier<LuaValue> query) {
-        registerDynamicField(LuaValue.valueOf(name),
-                new DynamicField<WeakType>(this) {
-                    @Override
-                    public LuaValue query() {
-                        return query.get();
-                    }
-                });
+    public void registerDynamicField(String name, Supplier<LuaValue> query) {
+        registerDynamicField(LuaValue.valueOf(name), new
+                DynamicField<WeakType>(this) {
+            @Override
+            public LuaValue query() {
+                return query.get();
+            }
+        });
     }
 
     public void registerDynamicField(LuaValue key, DynamicField field) {
@@ -153,21 +199,20 @@ public abstract class WeakType extends LuaTable implements IWeakType {
         registerLinkedField(LuaValue.valueOf(name), field);
     }
 
-    public void registerLinkedField(String name,
-                                    java.util.function.Consumer<LuaValue> update,
-                                    java.util.function.Supplier<LuaValue> query) {
-        registerLinkedField(LuaValue.valueOf(name),
-                new LinkedField<WeakType>() {
-                    @Override
-                    public void update(LuaValue val) {
-                        update.accept(val);
-                    }
+    public void registerLinkedField(String name, Consumer<LuaValue> update,
+                                    Supplier<LuaValue> query) {
+        registerLinkedField(LuaValue.valueOf(name), new LinkedField<WeakType>
+                () {
+            @Override
+            public void update(LuaValue val) {
+                update.accept(val);
+            }
 
-                    @Override
-                    public LuaValue query() {
-                        return query.get();
-                    }
-                });
+            @Override
+            public LuaValue query() {
+                return query.get();
+            }
+        });
     }
 
     public void registerLinkedField(LuaValue key, LinkedField field) {

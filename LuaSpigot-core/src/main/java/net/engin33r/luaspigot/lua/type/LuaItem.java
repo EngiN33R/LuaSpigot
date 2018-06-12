@@ -3,7 +3,7 @@ package net.engin33r.luaspigot.lua.type;
 import net.engin33r.luaspigot.lua.TableUtils;
 import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
@@ -23,7 +23,7 @@ public class LuaItem extends WrapperType<ItemStack> {
         public LuaItemMeta(ItemStack item, ItemMeta handle) {
             super(handle);
 
-            registerLinkedField("name",
+            registerLinkedField("value",
                     val -> {
                         handle.setDisplayName(val.checkjstring());
                         item.setItemMeta(handle);
@@ -39,20 +39,20 @@ public class LuaItem extends WrapperType<ItemStack> {
                             LuaString::valueOf));
         }
 
-        @MethodDef("addEnchantment")
+        @MethodDefinition("addEnchantment")
         public Varargs addEnchantment(Varargs arg) {
             getHandle().addEnchant(Enchantment.getByName(arg.checkjstring(1)),
                     arg.checkint(2), arg.checkboolean(3));
             return NIL;
         }
 
-        @MethodDef("hasEnchantment")
+        @MethodDefinition("hasEnchantment")
         public Varargs hasEnchantment(Varargs arg) {
             return LuaBoolean.valueOf(getHandle()
                     .hasEnchant(Enchantment.getByName(arg.checkjstring(1))));
         }
 
-        @MethodDef("removeEnchantment")
+        @MethodDefinition("removeEnchantment")
         public Varargs removeEnchantment(Varargs arg) {
             getHandle().removeEnchant(
                     Enchantment.getByName(arg.checkjstring(1)));

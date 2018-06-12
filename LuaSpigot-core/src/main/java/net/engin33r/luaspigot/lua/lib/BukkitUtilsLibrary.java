@@ -1,8 +1,8 @@
 package net.engin33r.luaspigot.lua.lib;
 
 import net.engin33r.luaspigot.lua.Library;
-import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
+import net.engin33r.luaspigot.lua.TypeUtils;
+import net.engin33r.luaspigot.lua.annotation.LibraryFunctionDefinition;
 import net.engin33r.luaspigot.lua.type.LuaBlock;
 import net.engin33r.luaspigot.lua.type.LuaItem;
 import net.engin33r.luaspigot.lua.type.LuaPlayer;
@@ -31,45 +31,45 @@ public class BukkitUtilsLibrary extends Library {
         return "bukkit";
     }
 
-    @LibFunctionDef(name = "new", module = "color")
+    @LibraryFunctionDefinition(value = "new", module = "color")
     public Varargs newColor(Varargs args) {
         return new LuaColor(args.checkint(1), args.checkint(2),
                 args.checkint(3));
     }
 
-    @LibFunctionDef(name = "new", module = "vector")
+    @LibraryFunctionDefinition(value = "new", module = "vector")
     public Varargs newVector(Varargs args) {
         return new LuaVector(args.checkdouble(1), args.checkdouble(2),
                 args.checkdouble(3));
     }
 
-    @LibFunctionDef(name = "new", module = "item")
+    @LibraryFunctionDefinition(value = "new", module = "item")
     public Varargs newItem(Varargs args) {
         return new LuaItem(args.checkjstring(1), args.optint(2, 1));
     }
 
-    @LibFunctionDef(name = "at", module = "block")
+    @LibraryFunctionDefinition(value = "at", module = "block")
     public Varargs blockAt(Varargs args) {
-        TypeValidator.validate(args.checktable(1), "world");
+        TypeUtils.validate(args.checktable(1), "world");
         return new LuaBlock(new Location(((LuaWorld) args.checktable(1))
                 .getHandle(), args.checkdouble(2), args.checkdouble(3),
                 args.checkdouble(4)));
     }
 
-    @LibFunctionDef(name = "getByName", module = "world")
+    @LibraryFunctionDefinition(value = "getByName", module = "world")
     public Varargs getWorldByName(Varargs args) {
         World w = Bukkit.getWorld(args.checkjstring(1));
         return w == null ? NIL : new LuaWorld(w);
     }
 
-    @LibFunctionDef(name = "getByUUID", module = "world")
+    @LibraryFunctionDefinition(value = "getByUUID", module = "world")
     public Varargs getWorldByUUID(Varargs args) {
-        TypeValidator.validate(args.checktable(1), "uuid");
+        TypeUtils.validate(args.checktable(1), "uuid");
         World w = Bukkit.getWorld(((LuaUUID) args.checktable(1)).getHandle());
         return w == null ? NIL : new LuaWorld(w);
     }
 
-    @LibFunctionDef(name = "getByName", module = "player")
+    @LibraryFunctionDefinition(value = "getByName", module = "player")
     @SuppressWarnings("deprecation")
     public Varargs getPlayerByName(Varargs args) {
         String name = args.checkjstring(1);
@@ -80,13 +80,13 @@ public class BukkitUtilsLibrary extends Library {
         }
     }
 
-    @LibFunctionDef(name = "getByUUID", module = "player")
+    @LibraryFunctionDefinition(value = "getByUUID", module = "player")
     public Varargs getPlayerByUUID(Varargs args) {
         UUID uuid;
         if (args.isstring(1)) {
             uuid = UUID.fromString(args.tojstring(1));
         } else if (args.istable(1) &&
-                TypeValidator.is(args.checktable(1), "uuid")) {
+                TypeUtils.is(args.checktable(1), "uuid")) {
             uuid = ((LuaUUID) args.checktable(1)).getHandle();
         } else {
             LuaValue.error("string or table expected, got "
@@ -97,7 +97,7 @@ public class BukkitUtilsLibrary extends Library {
         return new LuaPlayer(Bukkit.getOfflinePlayer(uuid));
     }
 
-    @LibFunctionDef(name = "broadcast", module = "chat")
+    @LibraryFunctionDefinition(value = "broadcast", module = "chat")
     public Varargs broadcast(Varargs args) {
         int n = args.narg();
         if (n == 0) return NIL;

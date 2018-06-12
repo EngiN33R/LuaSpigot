@@ -77,7 +77,7 @@ public class CommandLibrary extends Library {
             } else if (sender instanceof Entity) {
                 lsender.set("entity", new LuaEntity((Entity) sender));
             }
-            lsender.set("name", sender.getName());
+            lsender.set("value", sender.getName());
             lsender.set("message", new LuaFunction() {
                 @Override
                 public Varargs invoke(Varargs args) {
@@ -127,7 +127,7 @@ public class CommandLibrary extends Library {
         @Override
         public Varargs call(Varargs args) {
             LuaTable properties = args.checktable(1);
-            String name = properties.get("name").checkjstring();
+            String name = properties.get("value").checkjstring();
 
             LuaCommand cmd = new LuaCommand(name, properties);
             commandMap.register(name, "luaspigot", cmd);

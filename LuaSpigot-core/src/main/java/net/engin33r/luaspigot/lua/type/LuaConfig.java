@@ -2,8 +2,8 @@ package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.TableUtils;
-import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.TypeUtils;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import net.engin33r.luaspigot.lua.type.util.LuaColor;
 import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.Color;
@@ -91,11 +91,11 @@ public class LuaConfig extends WrapperType<ConfigurationSection> {
     }
 
     private List<?> formList(LuaTable tbl, String type) {
-        if (TypeValidator.strongCheckOf(tbl, TBOOLEAN)) {
+        if (TypeUtils.strongIsTableOf(tbl, TBOOLEAN)) {
             return TableUtils.listFrom(tbl, LuaValue::toboolean);
-        } else if (TypeValidator.strongCheckOf(tbl, TSTRING)) {
+        } else if (TypeUtils.strongIsTableOf(tbl, TSTRING)) {
             return TableUtils.listFrom(tbl, LuaValue::tojstring);
-        } else if (TypeValidator.strongCheckOf(tbl, TNUMBER)) {
+        } else if (TypeUtils.strongIsTableOf(tbl, TNUMBER)) {
             switch (type) {
                 case "int":
                     return TableUtils.listFrom(tbl, LuaValue::toint);
@@ -104,17 +104,17 @@ public class LuaConfig extends WrapperType<ConfigurationSection> {
                 default:
                     return TableUtils.listFrom(tbl, LuaValue::todouble);
             }
-        } else if (TypeValidator.strongCheckOf(tbl, TTABLE)) {
-            if (TypeValidator.checkOf(tbl, "player")) {
+        } else if (TypeUtils.strongIsTableOf(tbl, TTABLE)) {
+            if (TypeUtils.isTableOf(tbl, "player")) {
                 return TableUtils.listFrom(tbl,
                         o -> ((LuaPlayer) o).getHandle());
-            } else if (TypeValidator.checkOf(tbl, "item")) {
+            } else if (TypeUtils.isTableOf(tbl, "item")) {
                 return TableUtils.listFrom(tbl,
                         o -> ((LuaItem) o).getHandle());
-            } else if (TypeValidator.checkOf(tbl, "vector")) {
+            } else if (TypeUtils.isTableOf(tbl, "vector")) {
                 return TableUtils.listFrom(tbl,
                         o -> ((LuaVector) o).getVector());
-            } else if (TypeValidator.checkOf(tbl, "color")) {
+            } else if (TypeUtils.isTableOf(tbl, "color")) {
                 return TableUtils.listFrom(tbl,
                         o -> ((LuaColor) o).getHandle());
             }
@@ -122,7 +122,7 @@ public class LuaConfig extends WrapperType<ConfigurationSection> {
         return null;
     }
 
-    @MethodDef("set")
+    @MethodDefinition("set")
     public Varargs set(Varargs args) {
         String key = args.checkjstring(1);
         LuaValue value = args.checknotnil(2);
@@ -167,7 +167,7 @@ public class LuaConfig extends WrapperType<ConfigurationSection> {
         return NIL;
     }
 
-    @MethodDef("save")
+    @MethodDefinition("save")
     public Varargs save(Varargs args) {
         if (getHandle() instanceof FileConfiguration) {
             try {

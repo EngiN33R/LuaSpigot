@@ -1,7 +1,7 @@
 package net.engin33r.luaspigot.lua.lib;
 
 import net.engin33r.luaspigot.lua.Library;
-import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
+import net.engin33r.luaspigot.lua.annotation.LibraryFunctionDefinition;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -34,7 +34,7 @@ public class TaskLibrary extends Library {
         return "tasks";
     }
 
-    @LibFunctionDef(name = "sched", module = "async")
+    @LibraryFunctionDefinition(value = "sched", module = "async")
     public Varargs schedAsync(Varargs args) {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTaskAsynchronously(plugin, run::call);
@@ -42,7 +42,7 @@ public class TaskLibrary extends Library {
         return LuaNumber.valueOf(task.getTaskId());
     }
 
-    @LibFunctionDef(name = "repeating", module = "async")
+    @LibraryFunctionDefinition(value = "repeating", module = "async")
     public Varargs repeatingAsync(Varargs args) {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTaskTimerAsynchronously(plugin,
@@ -51,7 +51,7 @@ public class TaskLibrary extends Library {
         return LuaNumber.valueOf(task.getTaskId());
     }
 
-    @LibFunctionDef(name = "delayed", module = "async")
+    @LibraryFunctionDefinition(value = "delayed", module = "async")
     public Varargs delayedAsync(Varargs args) {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTaskLaterAsynchronously(plugin,
@@ -60,7 +60,7 @@ public class TaskLibrary extends Library {
         return LuaNumber.valueOf(task.getTaskId());
     }
 
-    @LibFunctionDef(name = "sched", module = "sync")
+    @LibraryFunctionDefinition(value = "sched", module = "sync")
     public Varargs schedSync(Varargs args) {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTask(plugin, run::call);
@@ -68,7 +68,7 @@ public class TaskLibrary extends Library {
         return LuaNumber.valueOf(task.getTaskId());
     }
 
-    @LibFunctionDef(name = "repeating", module = "sync")
+    @LibraryFunctionDefinition(value = "repeating", module = "sync")
     public Varargs repeatingSync(Varargs args) {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTaskTimer(plugin, run::call,
@@ -77,7 +77,7 @@ public class TaskLibrary extends Library {
         return LuaNumber.valueOf(task.getTaskId());
     }
 
-    @LibFunctionDef(name = "delayed", module = "sync")
+    @LibraryFunctionDefinition(value = "delayed", module = "sync")
     public Varargs delayedSync(Varargs args) {
         LuaFunction run = args.checkfunction(1);
         BukkitTask task = scheduler.runTaskLater(plugin, run::call,
@@ -86,7 +86,7 @@ public class TaskLibrary extends Library {
         return LuaNumber.valueOf(task.getTaskId());
     }
 
-    @LibFunctionDef(name = "cancel")
+    @LibraryFunctionDefinition(value = "cancel")
     public Varargs cancel(Varargs args) {
         int id = args.checkint(1);
         spawnedTasks.stream().filter(t -> t.getTaskId() == id)
@@ -96,7 +96,7 @@ public class TaskLibrary extends Library {
         return NIL;
     }
 
-    @LibFunctionDef(name = "cancelAll")
+    @LibraryFunctionDefinition(value = "cancelAll")
     public Varargs cancelAll(Varargs args) {
         scheduler.cancelAllTasks();
         spawnedTasks.clear();

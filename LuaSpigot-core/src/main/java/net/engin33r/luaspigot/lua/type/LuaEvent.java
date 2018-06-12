@@ -1,5 +1,6 @@
 package net.engin33r.luaspigot.lua.type;
 
+import net.engin33r.luaspigot.lua.TypeUtils;
 import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.Method;
@@ -28,86 +29,48 @@ public class LuaEvent extends WrapperType<Event> {
 
         if (ev instanceof Cancellable) {
             registerField("cancellable", TRUE);
-            registerLinkedField("cancelled", new CancelledField(this));
+            registerLinkedField("cancelled",
+                    val -> ((Cancellable) ev).setCancelled(val.checkboolean()),
+                    () -> LuaBoolean.valueOf(((Cancellable) ev).isCancelled()));
         }
 
         registerField("async", LuaBoolean.valueOf(ev.isAsynchronous()));
 
         if (ev instanceof AsyncPlayerPreLoginEvent) {
+            AsyncPlayerPreLoginEvent cev = (AsyncPlayerPreLoginEvent) ev;
             registerField("address", LuaString.valueOf(
                     ((AsyncPlayerPreLoginEvent) ev).getAddress()
                             .getCanonicalHostName()));
-            registerField("name", LuaString.valueOf(
+            registerField("value", LuaString.valueOf(
                     ((AsyncPlayerPreLoginEvent) ev).getName()));
             registerField("uuid", new LuaUUID(
                     ((AsyncPlayerPreLoginEvent) ev).getUniqueId()));
-            registerLinkedField("result", new LinkedField<LuaEvent>(this) {
-                @Override
-                public void update(LuaValue val) {
-                    ((AsyncPlayerPreLoginEvent) ev).setLoginResult(
-                            AsyncPlayerPreLoginEvent.Result
-                                    .valueOf(val.checkjstring().toUpperCase()));
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((AsyncPlayerPreLoginEvent) ev)
-                            .getLoginResult().name());
-                }
-            });
-            registerLinkedField("message", new LinkedField<LuaEvent>(this) {
-                @Override
-                public void update(LuaValue val) {
-                    ((AsyncPlayerPreLoginEvent) ev).setKickMessage(val
-                            .checkjstring());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((AsyncPlayerPreLoginEvent) ev)
-                            .getKickMessage());
-                }
-            });
-            registerMethod("allow", new Method<LuaEvent>(this) {
-                @Override
-                public Varargs call(Varargs args) {
-                    ((AsyncPlayerPreLoginEvent) ev).allow();
-                    return NIL;
-                }
-            });
-            registerMethod("disallow", new Method<LuaEvent>(this) {
-                @Override
-                public Varargs call(Varargs args) {
-                    ((AsyncPlayerPreLoginEvent) ev).disallow(
-                            AsyncPlayerPreLoginEvent.Result
-                                    .valueOf(args.checkjstring(1)),
-                            args.optjstring(2, ""));
-                    return NIL;
-                }
+            registerLinkedField("result",
+                    val -> cev.setLoginResult(
+                            TypeUtils.getEnum(val,
+                                    AsyncPlayerPreLoginEvent.Result.class)),
+                    () -> TypeUtils.checkEnum(cev.getLoginResult()));
+            registerLinkedField("message",
+                    val -> cev.setKickMessage(val.checkjstring()),
+                    () -> LuaString.valueOf(cev.getKickMessage()));
+            registerMethod("allow", cev::allow);
+            registerMethod("disallow", (args) -> {
+                cev.disallow(
+                        TypeUtils.getEnum(args.checkstring(1),
+                                AsyncPlayerPreLoginEvent.Result.class),
+                        args.optjstring(2, ""));
             });
         }
 
         if (ev instanceof InventoryMoveItemEvent) {
+            InventoryMoveItemEvent cev = (InventoryMoveItemEvent) ev;
             registerField("destination", new LuaInventory(
-                    ((InventoryMoveItemEvent) ev).getDestination()));
-            registerField("initiator", new LuaInventory(
-                    ((InventoryMoveItemEvent) ev).getInitiator()));
-            registerField("source", new LuaInventory(
-                    ((InventoryMoveItemEvent) ev).getSource()));
-
-            registerLinkedField("item", new LinkedField<LuaEvent>(this) {
-                @Override
-                public void update(LuaValue val) {
-                    ((InventoryMoveItemEvent) ev).setItem(((LuaItem)
-                            val.checktable()).getHandle());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return new LuaItem(((InventoryMoveItemEvent) ev)
-                            .getItem());
-                }
-            });
+                    cev.getDestination()));
+            registerField("initiator", new LuaInventory(cev.getInitiator()));
+            registerField("source", new LuaInventory(cev.getSource()));
+            registerLinkedField("item",
+                    val -> cev.setItem(TypeUtils.handleOf(val, LuaItem.class)),
+                    () -> new LuaItem(cev.getItem()));
         }
 
         if (ev instanceof InventoryPickupItemEvent) {
@@ -117,12 +80,10 @@ public class LuaEvent extends WrapperType<Event> {
         }
 
         if (ev instanceof PlayerLeashEntityEvent) {
-            registerField("entity", new LuaEntity(((PlayerLeashEntityEvent) ev)
-                    .getEntity()));
-            registerField("holder", new LuaEntity(((PlayerLeashEntityEvent) ev)
-                    .getLeashHolder()));
-            registerField("player", new LuaPlayer(((PlayerLeashEntityEvent) ev)
-                    .getPlayer()));
+            PlayerLeashEntityEvent cev = (PlayerLeashEntityEvent) ev;
+            registerField("entity", new LuaEntity(cev.getEntity()));
+            registerField("holder", new LuaEntity(cev.getLeashHolder()));
+            registerField("player", new LuaPlayer(cev.getPlayer()));
         }
 
         if (ev instanceof BlockEvent) {
@@ -154,21 +115,6 @@ public class LuaEvent extends WrapperType<Event> {
     @Override
     public String toLuaString() {
         return "event: " + getHandle().getEventName();
-    }
-
-    // 100% type-safety guarantee
-    private class CancelledField extends LinkedField<LuaEvent> {
-        public CancelledField(LuaEvent self) { super(self); }
-
-        @Override
-        public void update(LuaValue val) {
-            ((Cancellable) getHandle()).setCancelled(val.checkboolean());
-        }
-
-        @Override
-        public LuaValue query() {
-            return LuaValue.valueOf(((Cancellable) getHandle()).isCancelled());
-        }
     }
 
     @Override

@@ -2,9 +2,9 @@ package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.TypeUtils;
+import net.engin33r.luaspigot.lua.annotation.DynamicFieldDefinition;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.Bukkit;
@@ -28,7 +28,7 @@ public class LuaPlayer extends WrapperType<OfflinePlayer> {
         super(p);
 
         registerField("uuid", new LuaUUID(p.getUniqueId()));
-        registerField("name", LuaValue.valueOf(p.getName()));
+        registerField("value", LuaValue.valueOf(p.getName()));
 
         registerLinkedField("inventory", new InventoryField());
         registerLinkedField("location", new LocationField());
@@ -53,25 +53,25 @@ public class LuaPlayer extends WrapperType<OfflinePlayer> {
         return "player";
     }
 
-    @DynFieldDef("online")
+    @DynamicFieldDefinition("online")
     public LuaValue getOnline() {
         return LuaValue.valueOf(getHandle().isOnline());
     }
 
-    @DynFieldDef("location")
+    @DynamicFieldDefinition("location")
     public LuaValue getLocation() {
         Player p = getHandle().getPlayer();
         return p == null ? NIL : new LuaLocation(p.getLocation());
     }
 
-    @MethodDef("message")
+    @MethodDefinition("message")
     public Varargs message(Varargs args) {
         Player p = getHandle().getPlayer();
         if (p != null) p.sendMessage(args.checkjstring(1));
         return NIL;
     }
 
-    @MethodDef("teleport")
+    @MethodDefinition("teleport")
     public Varargs teleport(Varargs args) {
         Player p = getHandle().getPlayer();
         if (p == null) return NIL;
@@ -110,7 +110,7 @@ public class LuaPlayer extends WrapperType<OfflinePlayer> {
         return NIL;
     }
 
-    @DynFieldDef("inventory")
+    @DynamicFieldDefinition("inventory")
     public Varargs inventory() {
         Player p = getHandle().getPlayer();
         if (p == null) return NIL;
@@ -125,7 +125,7 @@ public class LuaPlayer extends WrapperType<OfflinePlayer> {
             if (pp == null) return;
 
             LuaTable tbl = val.checktable(1);
-            TypeValidator.validate(tbl, "location");
+            TypeUtils.validate(tbl, "location");
             pp.teleport(((LuaLocation) tbl).getHandle());
         }
 
@@ -141,9 +141,10 @@ public class LuaPlayer extends WrapperType<OfflinePlayer> {
             Player p = getHandle().getPlayer();
             if (p == null) return;
 
-            TypeValidator.validate(val.checktable(), "inventory");
-            p.getInventory().setContents(((LuaInventory) val.checktable())
-                    .getContents());
+            TypeUtils.validate(val.checktable(), "inventory");
+            p.getInventory().setContents(
+                    TypeUtils.checkOf(val, LuaInventory.class)
+                            .getContents());
         }
 
         @Override

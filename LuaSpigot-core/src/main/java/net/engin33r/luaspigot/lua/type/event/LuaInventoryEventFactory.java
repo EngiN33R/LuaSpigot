@@ -1,188 +1,123 @@
 package net.engin33r.luaspigot.lua.type.event;
 
-import net.engin33r.luaspigot.lua.DynamicField;
-import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.TableUtils;
+import net.engin33r.luaspigot.lua.TypeUtils;
 import net.engin33r.luaspigot.lua.type.*;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.enchantment.*;
 import org.bukkit.event.inventory.*;
 import org.luaj.vm2.*;
 
-import java.util.Map;
-
 public class LuaInventoryEventFactory {
     public static void build(InventoryEvent ev, LuaEvent lev) {
         lev.registerField("inventory", new LuaInventory(ev.getInventory()));
         lev.registerField("viewers", TableUtils.tableFrom(ev.getViewers(),
                 LuaEntity::new));
-        // TODO: InventoryView
 
         if (ev instanceof CraftItemEvent) {
-            lev.registerField("recipe", new LuaRecipe(((CraftItemEvent) ev)
-                    .getRecipe()));
+            CraftItemEvent cev = (CraftItemEvent) ev;
+            lev.registerField("recipe", new LuaRecipe(cev.getRecipe()));
         }
 
         if (ev instanceof EnchantItemEvent) {
-            lev.registerField("block", new LuaBlock(((EnchantItemEvent) ev)
-                    .getEnchantBlock()));
-            lev.registerField("player", new LuaPlayer(((EnchantItemEvent) ev)
-                    .getEnchanter()));
-            lev.registerField("button", LuaNumber.valueOf(
-                    ((EnchantItemEvent) ev).whichButton()));
-
-            Map<Enchantment, Integer> enchants = ((EnchantItemEvent) ev)
-                    .getEnchantsToAdd();
-            LuaTable enchantments = LuaTable.tableOf();
-            for (Enchantment e : enchants.keySet()) {
-                enchantments.set(LuaString.valueOf(e.getName()),
-                        LuaNumber.valueOf(enchants.get(e)));
-            }
-            lev.registerField("enchantments", enchantments);
-
-            lev.registerLinkedField("cost", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((EnchantItemEvent) ev).setExpLevelCost(val.checkint());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaNumber.valueOf(
-                            ((EnchantItemEvent) ev).getExpLevelCost());
-                }
-            });
+            EnchantItemEvent cev = (EnchantItemEvent) ev;
+            lev.registerField("block", new LuaBlock(cev.getEnchantBlock()));
+            lev.registerField("player", new LuaPlayer(cev.getEnchanter()));
+            lev.registerField("button", LuaNumber.valueOf(cev.whichButton()));
+            lev.registerField("enchantments", TableUtils.tableFrom(
+                    cev.getEnchantsToAdd(),
+                    k -> LuaString.valueOf(k.getName()),
+                    LuaNumber::valueOf));
+            lev.registerLinkedField("cost",
+                    val -> cev.setExpLevelCost(val.checkint()),
+                    () -> LuaNumber.valueOf(cev.getExpLevelCost()));
         }
 
         if (ev instanceof InventoryCloseEvent) {
+            InventoryCloseEvent cev = (InventoryCloseEvent) ev;
             lev.registerField("player", new LuaPlayer((Player)
-                    ((InventoryCloseEvent) ev).getPlayer()));
+                    cev.getPlayer()));
         }
 
         if (ev instanceof InventoryInteractEvent) {
-            lev.registerLinkedField("result", new LinkedField<LuaEvent>(lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((InventoryInteractEvent) ev).setResult(Event.Result
-                            .valueOf(val.checkjstring()));
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(((InventoryInteractEvent) ev)
-                            .getResult().toString());
-                }
-            });
-
+            InventoryInteractEvent cev = (InventoryInteractEvent) ev;
+            lev.registerLinkedField("result",
+                    val -> cev.setResult(
+                            TypeUtils.getEnum(val, Event.Result.class)),
+                    () -> TypeUtils.checkEnum(cev.getResult()));
             lev.registerField("player", new LuaPlayer((Player)
-                    ((InventoryInteractEvent) ev).getWhoClicked()));
+                    cev.getWhoClicked()));
 
             if (ev instanceof InventoryClickEvent) {
+                InventoryClickEvent ccev = (InventoryClickEvent) ev;
                 lev.registerField("action", LuaString.valueOf(
-                        ((InventoryClickEvent) ev).getAction().toString()));
+                        ccev.getAction().toString()));
                 lev.registerField("click", LuaString.valueOf(
-                        ((InventoryClickEvent) ev).getClick().toString()));
-                lev.registerField("cursor", new LuaItem(
-                        ((InventoryClickEvent) ev).getCursor()));
+                        ccev.getClick().toString()));
+                lev.registerField("cursor", new LuaItem(ccev.getCursor()));
                 lev.registerField("button", LuaNumber.valueOf(
-                        ((InventoryClickEvent) ev).getHotbarButton()));
-                lev.registerField("slot", LuaNumber.valueOf(
-                        ((InventoryClickEvent) ev).getSlot()));
+                        ccev.getHotbarButton()));
+                lev.registerField("slot", LuaNumber.valueOf(ccev.getSlot()));
                 lev.registerField("rawSlot", LuaNumber.valueOf(
-                        ((InventoryClickEvent) ev).getRawSlot()));
+                        ccev.getRawSlot()));
                 lev.registerField("slotType", LuaString.valueOf(
-                        ((InventoryClickEvent) ev).getSlotType().toString()));
+                        ccev.getSlotType().toString()));
 
                 lev.registerField("clickLeft", LuaBoolean.valueOf(
-                        ((InventoryClickEvent) ev).isLeftClick()));
+                        ccev.isLeftClick()));
                 lev.registerField("clickRight", LuaBoolean.valueOf(
-                        ((InventoryClickEvent) ev).isRightClick()));
+                        ccev.isRightClick()));
                 lev.registerField("clickShift", LuaBoolean.valueOf(
-                        ((InventoryClickEvent) ev).isShiftClick()));
+                        ccev.isShiftClick()));
 
-                lev.registerLinkedField("currentItem", new LinkedField<LuaEvent>
-                        (lev) {
-                    @Override
-                    public void update(LuaValue val) {
-                        ((InventoryClickEvent) ev).setCurrentItem(
-                                ((LuaItem) val.checktable()).getHandle());
-                    }
-
-                    @Override
-                    public LuaValue query() {
-                        return new LuaItem(((InventoryClickEvent) ev)
-                                .getCurrentItem());
-                    }
-                });
+                lev.registerLinkedField("currentItem",
+                        val -> ccev.setCurrentItem(
+                                TypeUtils.handleOf(val, LuaItem.class)),
+                        () -> new LuaItem(ccev.getCurrentItem()));
             }
 
             if (ev instanceof InventoryDragEvent) {
+                InventoryDragEvent ccev = (InventoryDragEvent) ev;
                 lev.registerField("oldCursor", new LuaItem(
-                        ((InventoryDragEvent) ev).getOldCursor()));
+                        ccev.getOldCursor()));
                 lev.registerField("slots", TableUtils.tableFrom(
-                        ((InventoryDragEvent) ev).getInventorySlots(),
+                        ccev.getInventorySlots(),
                         LuaNumber::valueOf));
                 lev.registerField("rawSlots", TableUtils.tableFrom(
-                        ((InventoryDragEvent) ev).getRawSlots(),
+                        ccev.getRawSlots(),
                         LuaNumber::valueOf));
                 lev.registerField("type", LuaString.valueOf(
-                        ((InventoryDragEvent) ev).getType().toString()));
-
-                LuaTable newitems = LuaTable.tableOf();
-                for (Integer k : ((InventoryDragEvent) ev).getNewItems()
-                        .keySet()) {
-                    newitems.set(k, new LuaItem(((InventoryDragEvent) ev)
-                            .getNewItems().get(k)));
-                }
-                lev.registerField("newItems", newitems);
+                        ccev.getType().toString()));
+                lev.registerField("newItems", TableUtils.tableFrom(
+                        ccev.getNewItems(), LuaNumber::valueOf, LuaItem::new));
 
                 lev.registerLinkedField("cursor",
-                        new LinkedField<LuaEvent>(lev) {
-                            @Override
-                            public void update(LuaValue val) {
-                                ((InventoryDragEvent) ev).setCursor(
-                                        ((LuaItem) val.checktable())
-                                                .getHandle());
-                            }
-
-                            @Override
-                            public LuaValue query() {
-                                return new LuaItem(((InventoryDragEvent) ev)
-                                        .getCursor());
-                            }
-                        });
+                        val -> ccev.setCursor(
+                                TypeUtils.handleOf(val, LuaItem.class)),
+                        () -> new LuaItem(ccev.getCursor()));
             }
         }
 
         if (ev instanceof InventoryOpenEvent) {
-            lev.registerField("player", new LuaPlayer((Player)
-                    ((InventoryOpenEvent) ev).getPlayer()));
+            InventoryOpenEvent cev = (InventoryOpenEvent) ev;
+            lev.registerField("player", new LuaPlayer(
+                    (Player) cev.getPlayer()));
         }
 
         if (ev instanceof PrepareItemCraftEvent) {
-            lev.registerField("recipe", new LuaRecipe(
-                    ((PrepareItemCraftEvent) ev).getRecipe()));
-            lev.registerField("repair", LuaBoolean.valueOf(
-                    ((PrepareItemCraftEvent) ev).isRepair()));
+            PrepareItemCraftEvent cev = (PrepareItemCraftEvent) ev;
+            lev.registerField("recipe", new LuaRecipe(cev.getRecipe()));
+            lev.registerField("repair", LuaBoolean.valueOf(cev.isRepair()));
         }
 
         if (ev instanceof PrepareItemEnchantEvent) {
-            lev.registerField("block", new LuaBlock(
-                    ((PrepareItemEnchantEvent) ev).getEnchantBlock()));
-            lev.registerField("enchanter", new LuaPlayer(
-                    ((PrepareItemEnchantEvent) ev).getEnchanter()));
+            PrepareItemEnchantEvent cev = (PrepareItemEnchantEvent) ev;
+            lev.registerField("block", new LuaBlock(cev.getEnchantBlock()));
+            lev.registerField("enchanter", new LuaPlayer(cev.getEnchanter()));
             lev.registerField("repair", LuaNumber.valueOf(
-                    ((PrepareItemEnchantEvent) ev).getEnchantmentBonus()));
-
-            lev.registerDynamicField("item", new DynamicField<LuaEvent>(lev) {
-                @Override
-                public LuaValue query() {
-                    return new LuaItem(((PrepareItemEnchantEvent) ev)
-                            .getItem());
-                }
-            });
+                    cev.getEnchantmentBonus()));
+            lev.registerField("item", new LuaItem(cev.getItem()));
             // TODO: Process enchantment offers
         }
     }

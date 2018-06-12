@@ -1,6 +1,6 @@
 package net.engin33r.luaspigot.lua.type.event;
 
-import net.engin33r.luaspigot.lua.LinkedField;
+import net.engin33r.luaspigot.lua.TypeUtils;
 import net.engin33r.luaspigot.lua.type.*;
 import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.Instrument;
@@ -28,204 +28,134 @@ public class LuaBlockEventFactory {
         }
 
         if (ev instanceof BlockCanBuildEvent) {
+            BlockCanBuildEvent cev = (BlockCanBuildEvent) ev;
             lev.registerField("material", LuaString.valueOf(
-                    ((BlockCanBuildEvent) ev).getMaterial().name()));
+                    cev.getMaterial().name()));
 
-            lev.registerLinkedField("buildable", new LinkedField<LuaEvent>(
-                    lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((BlockCanBuildEvent) ev).setBuildable(val.checkboolean());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaBoolean.valueOf(((BlockCanBuildEvent) ev)
-                            .isBuildable());
-                }
-            });
+            lev.registerLinkedField("buildable",
+                    val -> cev.setBuildable(val.checkboolean()),
+                    () -> LuaBoolean.valueOf(cev.isBuildable()));
         }
 
         if (ev instanceof BlockDamageEvent) {
-            lev.registerField("item", new LuaItem(((BlockDamageEvent) ev)
-                    .getItemInHand()));
-            lev.registerField("player", new LuaPlayer(((BlockDamageEvent) ev)
-                    .getPlayer()));
+            BlockDamageEvent cev = (BlockDamageEvent) ev;
+            lev.registerField("item", new LuaItem(cev.getItemInHand()));
+            lev.registerField("player", new LuaPlayer(cev.getPlayer()));
 
-            lev.registerLinkedField("instabreak", new LinkedField<LuaEvent>(
-                    lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((BlockDamageEvent) ev).setInstaBreak(val.checkboolean());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaBoolean.valueOf(((BlockDamageEvent) ev)
-                            .getInstaBreak());
-                }
-            });
+            lev.registerLinkedField("instabreak",
+                    val -> cev.setInstaBreak(val.checkboolean()),
+                    () -> LuaBoolean.valueOf(cev.getInstaBreak()));
         }
 
         if (ev instanceof BlockDispenseEvent) {
-            lev.registerLinkedField("item", new LinkedField<LuaEvent>(
-                    lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((BlockDispenseEvent) ev).setItem(((LuaItem)
-                            val.checktable()).getHandle());
-                }
+            BlockDispenseEvent cev = (BlockDispenseEvent) ev;
 
-                @Override
-                public LuaValue query() {
-                    return new LuaItem(((BlockDispenseEvent) ev)
-                            .getItem());
-                }
-            });
-            lev.registerLinkedField("velocity", new LinkedField<LuaEvent>(
-                    lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((BlockDispenseEvent) ev).setVelocity(((LuaVector)
-                            val.checktable()).getVector());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return new LuaVector(((BlockDispenseEvent) ev)
-                            .getVelocity());
-                }
-            });
+            lev.registerLinkedField("item",
+                    val -> cev.setItem(TypeUtils.handleOf(val, LuaItem.class)),
+                    () -> new LuaItem(cev.getItem()));
+            lev.registerLinkedField("velocity",
+                    val -> cev.setVelocity(TypeUtils.handleOf(val,
+                            LuaVector.class)),
+                    () -> new LuaVector(cev.getVelocity()));
         }
 
         if (ev instanceof BlockExpEvent) {
-            lev.registerLinkedField("velocity", new LinkedField<LuaEvent>(
-                    lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((BlockExpEvent) ev).setExpToDrop(val.checkint());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaNumber.valueOf(((BlockExpEvent) ev)
-                            .getExpToDrop());
-                }
-            });
+            BlockExpEvent cev = (BlockExpEvent) ev;
+            lev.registerLinkedField("exp",
+                    val -> cev.setExpToDrop(val.checkint()),
+                    () -> LuaNumber.valueOf(cev.getExpToDrop()));
         }
 
         if (ev instanceof EntityBlockFormEvent) {
-            lev.registerField("entity", new LuaEntity(
-                    ((EntityBlockFormEvent) ev).getEntity()));
+            EntityBlockFormEvent cev = (EntityBlockFormEvent) ev;
+            lev.registerField("entity", new LuaEntity(cev.getEntity()));
         }
 
         if (ev instanceof BlockFromToEvent) {
-            lev.registerField("face", LuaString.valueOf(((BlockFromToEvent) ev)
+            BlockFromToEvent cev = (BlockFromToEvent) ev;
+            lev.registerField("face", LuaString.valueOf(cev
                     .getFace().toString()));
-            lev.registerField("to", new LuaBlock(((BlockFromToEvent) ev)
-                    .getToBlock()));
+            lev.registerField("to", new LuaBlock(cev.getToBlock()));
         }
 
         if (ev instanceof BlockGrowEvent) {
-            lev.registerField("newState", new LuaBlock(((BlockGrowEvent) ev)
-                    .getNewState()));
+            BlockGrowEvent cev = (BlockGrowEvent) ev;
+            lev.registerField("newState", new LuaBlock(cev.getNewState()));
         }
 
         if (ev instanceof BlockIgniteEvent) {
-            lev.registerField("cause", LuaString.valueOf(((BlockIgniteEvent) ev)
+            BlockIgniteEvent cev = (BlockIgniteEvent) ev;
+            lev.registerField("cause", LuaString.valueOf(cev
                     .getCause().toString()));
-            if (((BlockIgniteEvent) ev).getIgnitingBlock() != null)
+            if (cev.getIgnitingBlock() != null)
                 lev.registerField("igniteBlock", new LuaBlock(
-                        ((BlockIgniteEvent) ev).getIgnitingBlock()));
-            lev.registerField("entity", new LuaEntity(((BlockIgniteEvent) ev)
-                    .getIgnitingEntity()));
-            if (((BlockIgniteEvent) ev).getPlayer() != null)
-                lev.registerField("player", new LuaPlayer(
-                        ((BlockIgniteEvent) ev).getPlayer()));
+                        cev.getIgnitingBlock()));
+            lev.registerField("entity", new LuaEntity(cev.getIgnitingEntity()));
+            if (cev.getPlayer() != null)
+                lev.registerField("player", new LuaPlayer(cev.getPlayer()));
         }
 
         if (ev instanceof BlockMultiPlaceEvent) {
+            BlockMultiPlaceEvent cev = (BlockMultiPlaceEvent) ev;
             LuaTable tbl = LuaTable.tableOf();
-            for (BlockState b : ((BlockMultiPlaceEvent) ev)
-                    .getReplacedBlockStates()) {
+            for (BlockState b : cev.getReplacedBlockStates()) {
                 tbl.set(tbl.length()+1, new LuaBlock(b));
             }
         }
 
         if (ev instanceof BlockPhysicsEvent) {
+            BlockPhysicsEvent cev = (BlockPhysicsEvent) ev;
             lev.registerField("material", LuaString.valueOf(
-                    ((BlockPhysicsEvent) ev).getChangedType().toString()));
+                    cev.getChangedType().toString()));
         }
 
         if (ev instanceof BlockPistonEvent) {
+            BlockPistonEvent cev = (BlockPistonEvent) ev;
             lev.registerField("direction", LuaString.valueOf(
-                    ((BlockPistonEvent) ev).getDirection().toString()));
-            lev.registerField("sticky", LuaBoolean.valueOf(
-                    ((BlockPistonEvent) ev).isSticky()));
+                    cev.getDirection().toString()));
+            lev.registerField("sticky", LuaBoolean.valueOf(cev.isSticky()));
         }
 
         if (ev instanceof BlockPistonExtendEvent) {
+            BlockPistonExtendEvent cev = (BlockPistonExtendEvent) ev;
             LuaTable tbl = LuaTable.tableOf();
-            for (Block b : ((BlockPistonExtendEvent) ev).getBlocks()) {
+            for (Block b : cev.getBlocks()) {
                 tbl.set(tbl.length()+1, new LuaBlock(b));
             }
             lev.registerField("blocks", tbl);
         }
 
         if (ev instanceof BlockPlaceEvent) {
-            lev.registerField("against", new LuaBlock(((BlockPlaceEvent) ev)
-                    .getBlockAgainst()));
-            lev.registerField("placed", new LuaBlock(((BlockPlaceEvent) ev)
-                    .getBlockPlaced()));
-            lev.registerField("replaced", new LuaBlock(((BlockPlaceEvent) ev)
+            BlockPlaceEvent cev = (BlockPlaceEvent) ev;
+            lev.registerField("against", new LuaBlock(cev.getBlockAgainst()));
+            lev.registerField("placed", new LuaBlock(cev.getBlockPlaced()));
+            lev.registerField("replaced", new LuaBlock(cev
                     .getBlockReplacedState()));
 
-            lev.registerField("item", new LuaItem(((BlockPlaceEvent) ev)
-                    .getItemInHand()));
-            lev.registerField("player", new LuaPlayer(((BlockPlaceEvent) ev)
-                    .getPlayer()));
+            lev.registerField("item", new LuaItem(cev.getItemInHand()));
+            lev.registerField("player", new LuaPlayer(cev.getPlayer()));
 
-            lev.registerLinkedField("buildable", new LinkedField<LuaEvent>(
-                    lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((BlockPlaceEvent) ev).setBuild(val.checkboolean());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaBoolean.valueOf(((BlockPlaceEvent) ev)
-                            .canBuild());
-                }
-            });
+            lev.registerLinkedField("buildable",
+                    val -> cev.setBuild(val.checkboolean()),
+                    () -> LuaBoolean.valueOf(cev.canBuild()));
         }
 
         if (ev instanceof BlockRedstoneEvent) {
-            lev.registerField("old", LuaNumber.valueOf(
-                    ((BlockRedstoneEvent) ev).getOldCurrent()));
-            lev.registerLinkedField("new", new LinkedField<LuaEvent>(
-                    lev) {
-                @Override
-                public void update(LuaValue val) {
-                    ((BlockRedstoneEvent) ev).setNewCurrent(val.checkint());
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaNumber.valueOf(((BlockRedstoneEvent) ev)
-                            .getNewCurrent());
-                }
-            });
+            BlockRedstoneEvent cev = (BlockRedstoneEvent) ev;
+            lev.registerField("old", LuaNumber.valueOf(cev.getOldCurrent()));
+            lev.registerLinkedField("new",
+                    val -> cev.setNewCurrent(val.checkint()),
+                    () -> LuaNumber.valueOf(cev.getNewCurrent()));
         }
 
         if (ev instanceof BlockSpreadEvent) {
-            lev.registerField("source", new LuaBlock(((BlockSpreadEvent) ev)
-                    .getSource()));
+            BlockSpreadEvent cev = (BlockSpreadEvent) ev;
+            lev.registerField("source", new LuaBlock(cev.getSource()));
         }
 
         if (ev instanceof EntityBlockFormEvent) {
-            lev.registerField("entity", new LuaEntity(
-                    ((EntityBlockFormEvent) ev).getEntity()));
+            EntityBlockFormEvent cev = (EntityBlockFormEvent) ev;
+            lev.registerField("entity", new LuaEntity(cev.getEntity()));
         }
 
         if (ev instanceof FurnaceBurnEvent) {
@@ -256,20 +186,10 @@ public class LuaBlockEventFactory {
 
         if (ev instanceof NotePlayEvent) {
             NotePlayEvent cev = (NotePlayEvent) ev;
-            lev.registerLinkedField("instrument", new LinkedField<LuaEvent>(
-                    lev) {
-                @Override
-                public void update(LuaValue val) {
-                    cev.setInstrument(Instrument.valueOf(
-                            val.checkjstring().toUpperCase()));
-                }
-
-                @Override
-                public LuaValue query() {
-                    return LuaString.valueOf(cev
-                            .getInstrument().toString());
-                }
-            });
+            lev.registerLinkedField("instrument",
+                    val -> cev.setInstrument(TypeUtils
+                            .getEnum(val, Instrument.class)),
+                    () -> TypeUtils.checkEnum(cev.getInstrument()));
 
             lev.registerLinkedField("note",
                     val -> {
@@ -296,21 +216,19 @@ public class LuaBlockEventFactory {
         }
 
         if (ev instanceof SignChangeEvent) {
+            SignChangeEvent cev = (SignChangeEvent) ev;
             lev.registerField("lines", new LuaTable() {
                 @Override
                 public void set(LuaValue key, LuaValue value) {
-                    ((SignChangeEvent) ev).setLine(key.checkint(),
-                            value.checkjstring());
+                    cev.setLine(key.checkint(), value.checkjstring());
                 }
 
                 @Override
                 public LuaValue get(LuaValue key) {
-                    return LuaString.valueOf(((SignChangeEvent) ev)
-                            .getLine(key.checkint()));
+                    return LuaString.valueOf(cev.getLine(key.checkint()));
                 }
             });
-            lev.registerField("player", new LuaPlayer(((SignChangeEvent) ev)
-                    .getPlayer()));
+            lev.registerField("player", new LuaPlayer(cev.getPlayer()));
         }
     }
 }

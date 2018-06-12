@@ -1,9 +1,9 @@
 package net.engin33r.luaspigot.lua.type;
 
-import net.engin33r.luaspigot.lua.TypeValidator;
+import net.engin33r.luaspigot.lua.TypeUtils;
 import net.engin33r.luaspigot.lua.WrapperType;
-import net.engin33r.luaspigot.lua.annotation.DynFieldDef;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.annotation.DynamicFieldDefinition;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -17,18 +17,18 @@ public class LuaInventoryView extends WrapperType<LuaInventory> {
         super(new LuaInventory(Bukkit.createInventory(null, size, title)));
     }
 
-    @MethodDef("displayTo")
+    @MethodDefinition("displayTo")
     public Varargs displayTo(Varargs arg) {
-        TypeValidator.validate(arg.checktable(1), "player");
+        TypeUtils.validate(arg.checktable(1), "player");
         LuaPlayer pl = (LuaPlayer) arg.checktable(1);
         Player bukkitPl = pl.getHandle().getPlayer();
         bukkitPl.openInventory(getInventory());
         return NIL;
     }
 
-    @MethodDef("closeFor")
+    @MethodDefinition("closeFor")
     public Varargs closeFor(Varargs arg) {
-        TypeValidator.validate(arg.checktable(1), "player");
+        TypeUtils.validate(arg.checktable(1), "player");
         LuaPlayer pl = (LuaPlayer) arg.checktable(1);
         Player bukkitPl = pl.getHandle().getPlayer();
         if (bukkitPl.getOpenInventory().getTopInventory()
@@ -38,7 +38,7 @@ public class LuaInventoryView extends WrapperType<LuaInventory> {
         return NIL;
     }
 
-    @DynFieldDef("inventory")
+    @DynamicFieldDefinition("inventory")
     public LuaValue getLuaInventory() {
         return getHandle();
     }

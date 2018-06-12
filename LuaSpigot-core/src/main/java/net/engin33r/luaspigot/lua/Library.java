@@ -1,6 +1,6 @@
 package net.engin33r.luaspigot.lua;
 
-import net.engin33r.luaspigot.lua.annotation.LibFunctionDef;
+import net.engin33r.luaspigot.lua.annotation.LibraryFunctionDefinition;
 import org.bukkit.Bukkit;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -26,16 +26,21 @@ public abstract class Library implements ILibrary {
 
         final Class<? extends Library> clazz = this.getClass();
         for (java.lang.reflect.Method m : clazz.getDeclaredMethods()) {
-            LibFunctionDef funcAnn = m.getAnnotation(LibFunctionDef.class);
-            if (funcAnn != null) {
-                registerFunction(funcAnn.name(), new Function() {
+            if (m.isAnnotationPresent(LibraryFunctionDefinition.class)) {
+                LibraryFunctionDefinition funcAnn = m.getAnnotation(LibraryFunctionDefinition.class);
+
+                String name = funcAnn.value();
+                name = name.equals("") ? m.getName() : name;
+                String module = funcAnn.module().equals("")
+                        ? null : funcAnn.module();
+                registerFunction(name, new Function() {
                     @Override
                     public Varargs call(Varargs args) {
                         try {
                             return (Varargs) m.invoke(Library.this, args);
                         } catch (IllegalAccessException e) {
-                            /*error(e.toString() + ": " +
-                                    String.valueOf(e.getMessage()));*/
+                        /*error(e.toString() + ": " +
+                                String.valueOf(e.getMessage()));*/
                             e.printStackTrace();
                         } catch (InvocationTargetException e) {
                             e.printStackTrace();
@@ -43,7 +48,7 @@ public abstract class Library implements ILibrary {
                         }
                         return NIL;
                     }
-                }, funcAnn.module().equals("") ? null : funcAnn.module());
+                }, module);
             }
         }
     }

@@ -1,7 +1,7 @@
 package net.engin33r.luaspigot.lua.type.db;
 
 import net.engin33r.luaspigot.lua.WeakType;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -31,7 +31,7 @@ public class LuaDB extends WeakType {
         return "database";
     }
 
-    @MethodDef("prepare")
+    @MethodDefinition("prepare")
     public Varargs prepare(Varargs args) {
         try {
             PreparedStatement stmt = conn.prepareStatement(args
@@ -44,7 +44,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef("begin")
+    @MethodDefinition("begin")
     public Varargs begin(Varargs args) {
         try {
             conn.setAutoCommit(false);
@@ -55,7 +55,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef("execute")
+    @MethodDefinition("execute")
     public Varargs execute(Varargs args) {
         try {
             LuaTable tbl = LuaTable.tableOf();
@@ -103,7 +103,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef("commit")
+    @MethodDefinition("commit")
     public Varargs commit(Varargs args) {
         try {
             conn.commit();
@@ -115,7 +115,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef("rollback")
+    @MethodDefinition("rollback")
     public Varargs rollback(Varargs args) {
         try {
             conn.rollback();
@@ -127,7 +127,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef("errors")
+    @MethodDefinition("errors")
     public Varargs errors(Varargs args) {
         try {
             LuaTable errs = LuaTable.tableOf();
@@ -145,7 +145,7 @@ public class LuaDB extends WeakType {
         return NIL;
     }
 
-    @MethodDef("close")
+    @MethodDefinition("close")
     public Varargs close(Varargs args) {
         try {
             conn.close();

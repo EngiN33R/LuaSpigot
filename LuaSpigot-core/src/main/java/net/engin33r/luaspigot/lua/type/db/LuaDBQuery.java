@@ -2,7 +2,7 @@ package net.engin33r.luaspigot.lua.type.db;
 
 import lombok.RequiredArgsConstructor;
 import net.engin33r.luaspigot.lua.WeakType;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -34,7 +34,7 @@ public class LuaDBQuery extends WeakType {
         return stmt.toString();
     }
 
-    @MethodDef("setParameter")
+    @MethodDefinition("setParameter")
     public Varargs setParameter(Varargs args) {
         try {
             int param = args.checkint(1);
@@ -61,7 +61,7 @@ public class LuaDBQuery extends WeakType {
         return NIL;
     }
 
-    @MethodDef("execute")
+    @MethodDefinition("execute")
     public Varargs execute(Varargs args) {
         try {
             LuaTable tbl = LuaTable.tableOf();

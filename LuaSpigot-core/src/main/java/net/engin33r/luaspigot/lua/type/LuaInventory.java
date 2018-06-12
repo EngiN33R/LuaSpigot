@@ -2,8 +2,8 @@ package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.TableUtils;
-import net.engin33r.luaspigot.lua.TypeValidator;
-import net.engin33r.luaspigot.lua.annotation.MethodDef;
+import net.engin33r.luaspigot.lua.TypeUtils;
+import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.luaj.vm2.LuaTable;
@@ -23,7 +23,7 @@ public class LuaInventory extends WrapperType<Inventory> {
         super(inv);
 
         registerField("title", LuaValue.valueOf(inv.getTitle()));
-        registerField("name", LuaValue.valueOf(inv.getName()));
+        registerField("value", LuaValue.valueOf(inv.getName()));
         registerField("type", LuaValue.valueOf(inv.getType().name()
                 .toLowerCase()));
     }
@@ -42,22 +42,22 @@ public class LuaInventory extends WrapperType<Inventory> {
         return "inventory";
     }
 
-    @MethodDef("get")
+    @MethodDefinition("get")
     public Varargs get(Varargs arg) {
         ItemStack stack = getHandle().getItem(arg.checkint(1));
 
         return new LuaItem(stack);
     }
 
-    @MethodDef("getAll")
+    @MethodDefinition("getAll")
     public Varargs getAll(Varargs arg) {
         return TableUtils.tableFrom(
                 Arrays.asList(getHandle().getStorageContents()), LuaItem::new);
     }
 
-    @MethodDef("add")
+    @MethodDefinition("add")
     public Varargs add(Varargs arg) {
-        TypeValidator.validate(arg.checktable(1), "item");
+        TypeUtils.validate(arg.checktable(1), "item");
         Map<Integer, ItemStack> failed = getHandle().addItem(((LuaItem) arg
                 .checktable(1)).getHandle());
         LuaTable tbl = LuaValue.tableOf();
@@ -67,15 +67,15 @@ public class LuaInventory extends WrapperType<Inventory> {
         return tbl;
     }
 
-    @MethodDef("set")
+    @MethodDefinition("set")
     public Varargs set(Varargs arg) {
-        TypeValidator.validate(arg.checktable(2), "item");
+        TypeUtils.validate(arg.checktable(2), "item");
         getHandle().setItem(arg.checkint(1), ((LuaItem) arg.checktable(2))
                 .getHandle());
         return NIL;
     }
 
-    @MethodDef("setAll")
+    @MethodDefinition("setAll")
     public Varargs setAll(Varargs arg) {
         LuaTable tbl = arg.checktable(1);
         int size = tbl.length();
@@ -83,7 +83,7 @@ public class LuaInventory extends WrapperType<Inventory> {
         for (int i = 1; i <= size; i++) {
             if (tbl.get(i).isnil()) contents[i-1] = null;
             else {
-                TypeValidator.validate(tbl.get(i).checktable(), "item");
+                TypeUtils.validate(tbl.get(i).checktable(), "item");
                 contents[i-1] = ((LuaItem) tbl.get(i).checktable()).getHandle();
             }
         }
@@ -91,7 +91,7 @@ public class LuaInventory extends WrapperType<Inventory> {
         return NIL;
     }
 
-    @MethodDef("clear")
+    @MethodDefinition("clear")
     public Varargs clear(Varargs arg) {
         getHandle().clear();
         return NIL;

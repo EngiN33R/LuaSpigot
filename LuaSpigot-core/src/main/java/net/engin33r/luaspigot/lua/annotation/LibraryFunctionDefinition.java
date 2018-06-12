@@ -7,10 +7,11 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.METHOD;
 
 /**
- * Annotation for quick registration of metamethods.
+ * Annotation for quick registration of library functions.
  */
 @Target(value=METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MetaMethodDef {
-    String value();
+public @interface LibraryFunctionDefinition {
+    String value() default "";
+    String module() default "";
 }
