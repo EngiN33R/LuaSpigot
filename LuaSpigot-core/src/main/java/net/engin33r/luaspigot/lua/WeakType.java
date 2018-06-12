@@ -19,8 +19,8 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public abstract class WeakType extends LuaTable implements IWeakType {
-    private Map<LuaValue, DynamicField> dynFields = new HashMap<>();
-    private Map<LuaValue, LinkedField> linkedFields = new HashMap<>();
+    private final Map<LuaValue, DynamicField> dynFields = new HashMap<>();
+    private final Map<LuaValue, LinkedField> linkedFields = new HashMap<>();
 
     protected WeakType() {
         this.set("type", this.getName());

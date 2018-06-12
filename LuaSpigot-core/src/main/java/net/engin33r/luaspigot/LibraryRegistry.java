@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 /**
  * Registry for keeping track of Lua libraries available to scripts.
  */
+@SuppressWarnings("unused")
 public class LibraryRegistry {
     private final Map<String, Library> nameRegistry = new HashMap<>();
 

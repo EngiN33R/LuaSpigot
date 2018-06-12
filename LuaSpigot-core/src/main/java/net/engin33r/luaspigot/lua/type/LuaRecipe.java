@@ -15,12 +15,12 @@ import java.util.Map;
  * Wrapper type describing a crafting recipe.
  */
 public class LuaRecipe extends WrapperType<Recipe> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     private final String type;
 
-    private Map<Character, ItemStack> map = new HashMap<>();
-    private String[] strshape = {"", "", ""};
+    private final Map<Character, ItemStack> map = new HashMap<>();
+    private final String[] strshape = {"", "", ""};
 
     public LuaRecipe(Recipe r) {
         super(r);

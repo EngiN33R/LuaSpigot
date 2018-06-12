@@ -183,28 +183,7 @@ public class LuaInventoryEventFactory {
                             .getItem());
                 }
             });
-            lev.registerField("costs", new LuaTable() {
-                @Override
-                public LuaValue get(LuaValue key) {
-                    int k = key.checkint();
-                    int[] costs = ((PrepareItemEnchantEvent) ev)
-                            .getExpLevelCostsOffered();
-                    if (k <= costs.length) {
-                        return LuaNumber.valueOf(costs[k]);
-                    }
-                    return NIL;
-                }
-
-                @Override
-                public void set(LuaValue key, LuaValue value) {
-                    int k = key.checkint();
-                    int[] costs = ((PrepareItemEnchantEvent) ev)
-                            .getExpLevelCostsOffered();
-                    if (k <= costs.length) {
-                        costs[k] = value.checkint();
-                    }
-                }
-            });
+            // TODO: Process enchantment offers
         }
     }
 }

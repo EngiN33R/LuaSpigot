@@ -12,8 +12,7 @@ import org.luaj.vm2.Varargs;
 import java.util.List;
 
 public class LuaColor extends WrapperType<Color> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
-
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaColor(Color color) {
         super(color);

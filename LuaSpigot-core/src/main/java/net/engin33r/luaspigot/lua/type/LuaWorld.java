@@ -10,7 +10,7 @@ import org.luaj.vm2.LuaValue;
  * Wrapper type describing a Minecraft world.
  */
 public class LuaWorld extends WrapperType<World> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaWorld(World w) {
         super(w);

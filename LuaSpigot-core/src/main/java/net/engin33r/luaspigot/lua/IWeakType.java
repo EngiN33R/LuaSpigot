@@ -9,5 +9,5 @@ public interface IWeakType {
     String getName();
     default LuaValue index(LuaValue key) {
         return null;
-    };
+    }
 }

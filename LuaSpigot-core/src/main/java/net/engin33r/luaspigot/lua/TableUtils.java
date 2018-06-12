@@ -5,8 +5,8 @@ import org.luaj.vm2.LuaValue;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 public class TableUtils {
     /**
      * Processor interface used in array-to-table and collection-to-table
@@ -146,37 +146,6 @@ public class TableUtils {
     /**
      * Create a list ({@link ArrayList}) from the table passed to the method.
      * How each value in the table is processed is dependent on the
-     * processor function passed to the method.
-     * <p>
-     * This method only processes sequential numbered indices in the table.
-     * For non-sequential or non-integer indices, use {@link #mapFrom(LuaTable,
-     * Function, Function)}
-     * <p>
-     * If <code>nonull</code> is <code>true</code>, the method will ignore any
-     * object which the processor has returned <code>null</code> for. This makes
-     * it possible to create a list that is not a representation of the entire
-     * table.
-     * @param tbl Table to process
-     * @param nonull Ignore objects processed as null
-     * @param processor Processor
-     * @param <T> Type of values stored in the list
-     * @return List representation of the table
-     */
-    public static <T> List<T> listFrom(LuaTable tbl, boolean nonull,
-                                       Function<LuaValue, T> processor) {
-        List<T> list = new ArrayList<>();
-        for (int i = 1; i <= tbl.length(); i++) {
-            T obj = processor.apply(tbl.get(i));
-            if (!nonull || obj != null) {
-                list.add(i-1, obj);
-            }
-        }
-        return list;
-    }
-
-    /**
-     * Create a list ({@link ArrayList}) from the table passed to the method.
-     * How each value in the table is processed is dependent on the
      * processor function passed to the method. Equivalent to calling
      * <code>listFrom(tbl, false, processor)</code>.
      * @param tbl Table to process
@@ -187,7 +156,27 @@ public class TableUtils {
      */
     public static <T> List<T> listFrom(LuaTable tbl,
                                        Function<LuaValue, T> processor) {
-        return listFrom(tbl, false, processor);
+        return listFrom(tbl, false, processor::apply);
+    }
+
+    /**
+     * Create a map ({@link HashMap}) from the table passed to the method.
+     * How each key and value in the table is processed is dependent on the
+     * implementation of the processor passed to the method.
+     * @param tbl Table to process
+     * @param processor Processor for table keys and values
+     * @param <K> Type of keys used by the map
+     * @param <V> Type of values stored by the map
+     * @return Map representation of the table
+     */
+    public static <K,V> Map<K,V> mapFrom(LuaTable tbl,
+                                         MapProcessor<K,V> processor) {
+        Map<K,V> map = new HashMap<>();
+        for (LuaValue k : tbl.keys()) {
+            map.put(processor.processKey(k),
+                    processor.processValue(tbl.get(k)));
+        }
+        return map;
     }
 
     /**

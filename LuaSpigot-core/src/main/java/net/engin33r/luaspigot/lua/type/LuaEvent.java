@@ -3,7 +3,6 @@ package net.engin33r.luaspigot.lua.type;
 import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.Method;
-import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.type.event.*;
 import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import org.bukkit.event.Cancellable;
@@ -22,7 +21,7 @@ import org.luaj.vm2.*;
  * Wrapper type describing a Spigot event.
  */
 public class LuaEvent extends WrapperType<Event> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaEvent(Event ev) {
         super(ev);

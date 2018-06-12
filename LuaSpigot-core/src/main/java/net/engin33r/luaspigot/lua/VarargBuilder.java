@@ -1,6 +1,5 @@
 package net.engin33r.luaspigot.lua;
 
-import net.engin33r.luaspigot.lua.type.LuaEvent;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 

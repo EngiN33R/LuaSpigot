@@ -24,6 +24,7 @@ import static org.luaj.vm2.LuaValue.NIL;
 /**
  * General-purpose utility library for creating and discovering Spigot objects
  */
+@SuppressWarnings("unused")
 public class BukkitUtilsLibrary extends Library {
     @Override
     public String getName() {
@@ -101,14 +102,14 @@ public class BukkitUtilsLibrary extends Library {
         int n = args.narg();
         if (n == 0) return NIL;
 
-        String str = "";
+        StringBuilder str = new StringBuilder();
         for (int i = 1; i <= args.narg(); i++) {
-            if (i > 1) str += "\t";
-            str += args.checkjstring(i);
+            if (i > 1) str.append("\t");
+            str.append(args.checkjstring(i));
         }
 
         for (Player p : Bukkit.getOnlinePlayers()) {
-            p.sendMessage(str);
+            p.sendMessage(str.toString());
         }
         return NIL;
     }

@@ -15,7 +15,7 @@ import java.sql.*;
 // TODO: proper error handling
 @RequiredArgsConstructor
 public class LuaDBQuery extends WeakType {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     private final PreparedStatement stmt;
 

@@ -9,7 +9,7 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 public class LuaBook extends WrapperType<BookMeta> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaBook(BookMeta book) {
         super(book);
@@ -28,7 +28,7 @@ public class LuaBook extends WrapperType<BookMeta> {
     }
 
     private class PagesField extends LinkedField<LuaBook> {
-        PageTable tbl = new PageTable();
+        final PageTable tbl = new PageTable();
 
         @Override
         public void update(LuaValue val) {

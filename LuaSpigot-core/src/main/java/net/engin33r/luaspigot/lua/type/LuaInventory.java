@@ -17,7 +17,7 @@ import java.util.Map;
  * Wrapper type describing an inventory (chests, players etc.)
  */
 public class LuaInventory extends WrapperType<Inventory> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaInventory(Inventory inv) {
         super(inv);
@@ -52,8 +52,7 @@ public class LuaInventory extends WrapperType<Inventory> {
     @MethodDef("getAll")
     public Varargs getAll(Varargs arg) {
         return TableUtils.tableFrom(
-                Arrays.asList(getHandle().getStorageContents()),
-                i -> new LuaItem((ItemStack) i));
+                Arrays.asList(getHandle().getStorageContents()), LuaItem::new);
     }
 
     @MethodDef("add")

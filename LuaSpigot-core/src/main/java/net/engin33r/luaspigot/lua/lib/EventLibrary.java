@@ -32,7 +32,7 @@ import static org.luaj.vm2.LuaValue.NIL;
 @SuppressWarnings("unused")
 public class EventLibrary extends Library {
     private final Map<String, Set<LuaFunction>> handlers = new HashMap<>();
-    private static Set<Class<? extends EventListener>> listeners =
+    private static final Set<Class<? extends EventListener>> listeners =
             new HashSet<>();
 
     /* HERE WE GO BOYS */
@@ -398,9 +398,8 @@ public class EventLibrary extends Library {
         }
 
         @EventHandler(priority = EventPriority.LOW)
-        public void onPlayerAchievementAwarded(PlayerAchievementAwardedEvent
-                                                               ev) {
-            lib.callEvent("PlayerAchievementAwarded", ev);
+        public void onPlayerAdvancementDone(PlayerAdvancementDoneEvent ev) {
+            lib.callEvent("PlayerAdvancementDone", ev);
         }
 
         @EventHandler(priority = EventPriority.LOW)
@@ -546,11 +545,6 @@ public class EventLibrary extends Library {
         @EventHandler(priority = EventPriority.LOW)
         public void onPlayerPortal(PlayerPortalEvent ev) {
             lib.callEvent("PlayerPortal", ev);
-        }
-
-        @EventHandler(priority = EventPriority.LOW)
-        public void onPlayerPickupItem(PlayerPickupItemEvent ev) {
-            lib.callEvent("PlayerPickupItem", ev);
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
@@ -832,11 +826,8 @@ public class EventLibrary extends Library {
         LuaFunction func = args.checkfunction(2);
         System.out.println("attempting to add handler");
 
-        Set<LuaFunction> set = handlers.get(eventName);
-        if (set == null) {
-            set = new HashSet<>();
-            handlers.put(eventName, set);
-        }
+        Set<LuaFunction> set = handlers.computeIfAbsent(eventName,
+                k -> new HashSet<>());
 
         set.add(func);
 

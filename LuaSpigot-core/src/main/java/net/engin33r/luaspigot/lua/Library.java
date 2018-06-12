@@ -16,9 +16,10 @@ import static org.luaj.vm2.LuaValue.NIL;
 /**
  * Abstract class representing a Lua library for scripts to use.
  */
+@SuppressWarnings("unused")
 public abstract class Library implements ILibrary {
     private final LuaValue library;
-    private Map<String, Function> funcNameRegistry = new HashMap<>();
+    private final Map<String, Function> funcNameRegistry = new HashMap<>();
 
     protected Library() {
         library = LuaValue.tableOf();

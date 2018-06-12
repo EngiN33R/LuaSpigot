@@ -1,8 +1,8 @@
 package net.engin33r.luaspigot.lua.type;
 
-import net.engin33r.luaspigot.lua.WeakType;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.Method;
+import net.engin33r.luaspigot.lua.WrapperType;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -13,18 +13,52 @@ import org.luaj.vm2.*;
 /**
  * Wrapper type representing a single block within the world.
  */
-public class LuaBlock extends WeakType {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+public class LuaBlock extends WrapperType<LuaBlock.BlockHandle> {
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
-    private Block block;
-    private BlockState state;
-    private boolean dynamic = false;
-    private Material matCache;
+    public static class BlockHandle {
+        private boolean dynamic = false;
+        private Block block;
+        private BlockState state;
+
+        public BlockHandle(Block block) {
+            this.dynamic = true;
+            this.block = block;
+        }
+
+        public BlockHandle(BlockState state) {
+            this.state = state;
+        }
+
+        public Material getType() {
+            return dynamic ? block.getType() : state.getType();
+        }
+
+        public void setType(Material material) {
+            if (dynamic) {
+                block.setType(material);
+            } else {
+                state.setType(material);
+            }
+        }
+
+        @SuppressWarnings("deprecation")
+        public byte getData() {
+            return dynamic ? block.getData() : state.getData().getData();
+        }
+
+        @SuppressWarnings("deprecation")
+        public void setData(byte data) {
+            if (dynamic) {
+                block.setData(data);
+            } else {
+                state.setData(new MaterialData(state.getType(), data));
+            }
+        }
+    }
 
     public LuaBlock(Block block) {
-        this.block = block;
-        this.dynamic = true;
-        this.matCache = block.getType();
+        super(new BlockHandle(block));
 
         registerField("dynamic", LuaBoolean.valueOf(true));
 
@@ -46,8 +80,7 @@ public class LuaBlock extends WeakType {
     }
 
     public LuaBlock(BlockState state) {
-        this.state = state;
-        this.matCache = state.getType();
+        super(new BlockHandle(state));
 
         registerField("block", new LuaBlock(state.getBlock()));
 
@@ -75,10 +108,6 @@ public class LuaBlock extends WeakType {
         this(loc.getBlock());
     }
 
-    public Object getHandle() {
-        return dynamic ? block : state;
-    }
-
     @Override
     protected LuaValue getMetatable() {
         return typeMetatable;
@@ -92,26 +121,12 @@ public class LuaBlock extends WeakType {
     private class MaterialField extends LinkedField<LuaBlock> {
         @Override
         public void update(LuaValue val) {
-            matCache = Material.getMaterial(val.checkjstring());
-            if (dynamic)
-                block.setType(matCache);
-            else
-                state.setType(matCache);
+            getHandle().setType(Material.getMaterial(val.checkjstring()));
         }
 
         @Override
         public LuaValue query() {
-            if (dynamic) {
-                if (!matCache.equals(block.getType())) {
-                    matCache = block.getType();
-                }
-            } else {
-                if (!matCache.equals(state.getType())) {
-                    matCache = state.getType();
-                }
-            }
-
-            return LuaString.valueOf(matCache.toString());
+            return LuaString.valueOf(getHandle().getType().name());
         }
     }
 
@@ -119,20 +134,12 @@ public class LuaBlock extends WeakType {
     private class DataField extends LinkedField<LuaBlock> {
         @Override
         public void update(LuaValue val) {
-            if (dynamic)
-                block.setData((byte) val.checkint());
-            else
-                state.setData(new MaterialData(block.getType(),
-                        (byte) val.checkint()));
+            getHandle().setData((byte) val.checkint());
         }
 
         @Override
         public LuaValue query() {
-            if (dynamic) {
-                return LuaNumber.valueOf(block.getData());
-            } else {
-                return LuaNumber.valueOf(state.getData().getData());
-            }
+            return LuaNumber.valueOf(getHandle().getData());
         }
     }
 }

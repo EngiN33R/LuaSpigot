@@ -13,7 +13,7 @@ import org.luaj.vm2.Varargs;
  * Wrapper type describing a location in a world.
  */
 public class LuaLocation extends WrapperType<Location> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaLocation(Location loc) {
         super(loc);

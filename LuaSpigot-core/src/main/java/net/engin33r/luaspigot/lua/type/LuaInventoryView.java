@@ -11,7 +11,7 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 
 public class LuaInventoryView extends WrapperType<LuaInventory> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaInventoryView(int size, String title) {
         super(new LuaInventory(Bukkit.createInventory(null, size, title)));

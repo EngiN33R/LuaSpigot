@@ -9,7 +9,7 @@ import org.luaj.vm2.LuaValue;
  * Utility type describing a vector.
  */
 public class LuaVector extends WrapperType<Vector> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaVector(Vector vec) {
         super(vec);

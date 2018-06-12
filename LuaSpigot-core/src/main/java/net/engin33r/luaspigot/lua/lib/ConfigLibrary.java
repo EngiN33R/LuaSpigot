@@ -12,6 +12,7 @@ import java.io.StringReader;
 /**
  * Library to interact with config files.
  */
+@SuppressWarnings("unused")
 public class ConfigLibrary extends Library {
 
     @Override

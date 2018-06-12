@@ -15,15 +15,13 @@ import org.luaj.vm2.*;
  * Wrapper type that represents an item stack.
  */
 public class LuaItem extends WrapperType<ItemStack> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public static class LuaItemMeta extends WrapperType<ItemMeta> {
-        private static LuaValue typeMetatable = LuaValue.tableOf();
-        private ItemStack item;
+        private static final LuaValue typeMetatable = LuaValue.tableOf();
 
         public LuaItemMeta(ItemStack item, ItemMeta handle) {
             super(handle);
-            this.item = item;
 
             registerLinkedField("name",
                     val -> {

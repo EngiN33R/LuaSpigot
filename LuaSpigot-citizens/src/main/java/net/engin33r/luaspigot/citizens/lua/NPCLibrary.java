@@ -11,8 +11,6 @@ import org.bukkit.entity.EntityType;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.Varargs;
 
-import static org.luaj.vm2.LuaValue.NIL;
-
 /**
  * Library for NPC discovery and creation
  */

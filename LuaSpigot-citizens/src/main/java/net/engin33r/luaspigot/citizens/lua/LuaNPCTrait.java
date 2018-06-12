@@ -15,10 +15,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class LuaNPCTrait extends WrapperType<Trait> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public static class NPCTrait extends Trait {
-        private static Map<String, Set<LuaFunction>> callbacks =
+        private static final Map<String, Set<LuaFunction>> callbacks =
                 new HashMap<>();
 
         public void setName(String name) {

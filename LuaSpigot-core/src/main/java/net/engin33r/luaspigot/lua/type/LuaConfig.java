@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class LuaConfig extends WrapperType<ConfigurationSection> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaConfig(ConfigurationSection handle) {
         super(handle);

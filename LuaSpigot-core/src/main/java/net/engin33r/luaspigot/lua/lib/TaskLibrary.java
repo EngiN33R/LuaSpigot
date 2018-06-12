@@ -18,6 +18,7 @@ import static org.luaj.vm2.LuaValue.NIL;
 /**
  * Library for creating and managing Spigot async tasks.
  */
+@SuppressWarnings("unused")
 public class TaskLibrary extends Library {
     private final JavaPlugin plugin;
     private final BukkitScheduler scheduler;
@@ -103,7 +104,7 @@ public class TaskLibrary extends Library {
     }
 
     public void stop() {
-        spawnedTasks.stream().forEach(BukkitTask::cancel);
+        spawnedTasks.forEach(BukkitTask::cancel);
         spawnedTasks.clear();
     }
 }

@@ -17,8 +17,9 @@ import static org.luaj.vm2.LuaValue.NIL;
  * Library for interacting with SQLite databases. These methods should ideally
  * be used in async tasks (see {@link TaskLibrary}).
  */
+@SuppressWarnings("unused")
 public class DatabaseLibrary extends Library {
-    private Set<Connection> conns = new HashSet<>();
+    private final Set<Connection> conns = new HashSet<>();
 
     @Override
     public String getName() {

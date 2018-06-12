@@ -13,7 +13,7 @@ import java.util.UUID;
  * Weak type to definitely represent UUIDs.
  */
 public class LuaUUID extends WrapperType<UUID> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     public LuaUUID(UUID uuid) {
         super(uuid);

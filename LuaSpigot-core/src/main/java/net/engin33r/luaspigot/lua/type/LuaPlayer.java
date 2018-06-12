@@ -20,7 +20,7 @@ import org.luaj.vm2.Varargs;
  * Wrapper type describing a player on (or off) the server.
  */
 public class LuaPlayer extends WrapperType<OfflinePlayer> {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     private LuaInventory inv;
 

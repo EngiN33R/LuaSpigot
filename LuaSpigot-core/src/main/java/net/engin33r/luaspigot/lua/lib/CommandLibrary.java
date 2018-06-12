@@ -87,8 +87,7 @@ public class CommandLibrary extends Library {
             });
 
             return this.func.call(lsender, LuaString.valueOf(label),
-                    TableUtils.tableFrom(args,
-                            o -> LuaString.valueOf((String) o))).toboolean();
+                    TableUtils.tableFrom(args, LuaString::valueOf)).toboolean();
         }
     }
 
@@ -114,7 +113,7 @@ public class CommandLibrary extends Library {
             known.keySet().stream()
                     .filter(k -> known.get(k).getName().equals(name))
                     .forEach(todel::add);
-            todel.stream().forEach(known::remove);
+            todel.forEach(known::remove);
             if (commands.get(name) != null) commands.get(name)
                     .unregister(commandMap);
         } catch (Exception e) {

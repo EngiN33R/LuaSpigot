@@ -13,7 +13,7 @@ import java.sql.*;
  */
 // TODO: proper error handling
 public class LuaDB extends WeakType {
-    private static LuaValue typeMetatable = LuaValue.tableOf();
+    private static final LuaValue typeMetatable = LuaValue.tableOf();
 
     private final Connection conn;
 

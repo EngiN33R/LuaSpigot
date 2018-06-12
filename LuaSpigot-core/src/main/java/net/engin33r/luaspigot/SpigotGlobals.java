@@ -21,12 +21,12 @@ public class SpigotGlobals {
 
         public Varargs invoke(Varargs arg) {
             if (arg.narg() > 0) {
-                String str = "[Lua] ";
+                StringBuilder str = new StringBuilder("[Lua] ");
                 for (int i = 1; i <= arg.narg(); i++) {
-                    if (i > 1) str += "\t";
-                    str += arg.tojstring(i);
+                    if (i > 1) str.append("\t");
+                    str.append(arg.tojstring(i));
                 }
-                logger.info(str);
+                logger.info(str.toString());
             }
             return NIL;
         }
