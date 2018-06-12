@@ -2,7 +2,10 @@ package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.Method;
+import net.engin33r.luaspigot.lua.TypeUtils;
 import net.engin33r.luaspigot.lua.WrapperType;
+import net.engin33r.luaspigot.lua.annotation.LinkedFieldAccessorDefinition;
+import net.engin33r.luaspigot.lua.annotation.LinkedFieldMutatorDefinition;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -13,6 +16,7 @@ import org.luaj.vm2.*;
 /**
  * Wrapper type representing a single block within the world.
  */
+@SuppressWarnings("deprecation")
 public class LuaBlock extends WrapperType<LuaBlock.BlockHandle> {
     private static final LuaValue typeMetatable = LuaValue.tableOf();
 
@@ -42,12 +46,10 @@ public class LuaBlock extends WrapperType<LuaBlock.BlockHandle> {
             }
         }
 
-        @SuppressWarnings("deprecation")
         public byte getData() {
             return dynamic ? block.getData() : state.getData().getData();
         }
 
-        @SuppressWarnings("deprecation")
         public void setData(byte data) {
             if (dynamic) {
                 block.setData(data);
@@ -62,8 +64,6 @@ public class LuaBlock extends WrapperType<LuaBlock.BlockHandle> {
 
         registerField("dynamic", LuaBoolean.valueOf(true));
 
-        registerLinkedField("material", new MaterialField());
-        registerLinkedField("data", new DataField());
         registerField("x", LuaNumber.valueOf(block.getX()));
         registerField("y", LuaNumber.valueOf(block.getY()));
         registerField("z", LuaNumber.valueOf(block.getZ()));
@@ -82,10 +82,10 @@ public class LuaBlock extends WrapperType<LuaBlock.BlockHandle> {
     public LuaBlock(BlockState state) {
         super(new BlockHandle(state));
 
+        registerField("dynamic", LuaBoolean.valueOf(false));
+
         registerField("block", new LuaBlock(state.getBlock()));
 
-        registerLinkedField("material", new MaterialField());
-        registerLinkedField("data", new DataField());
         registerField("x", LuaNumber.valueOf(state.getX()));
         registerField("y", LuaNumber.valueOf(state.getY()));
         registerField("z", LuaNumber.valueOf(state.getZ()));
@@ -118,28 +118,23 @@ public class LuaBlock extends WrapperType<LuaBlock.BlockHandle> {
         return "block";
     }
 
-    private class MaterialField extends LinkedField<LuaBlock> {
-        @Override
-        public void update(LuaValue val) {
-            getHandle().setType(Material.getMaterial(val.checkjstring()));
-        }
-
-        @Override
-        public LuaValue query() {
-            return LuaString.valueOf(getHandle().getType().name());
-        }
+    @LinkedFieldMutatorDefinition("material")
+    public void setMaterial(LuaString material) {
+        getHandle().setType(TypeUtils.getEnum(material, Material.class));
     }
 
-    @SuppressWarnings("deprecation")
-    private class DataField extends LinkedField<LuaBlock> {
-        @Override
-        public void update(LuaValue val) {
-            getHandle().setData((byte) val.checkint());
-        }
+    @LinkedFieldAccessorDefinition("material")
+    public LuaString getMaterial() {
+        return TypeUtils.checkEnum(getHandle().getType());
+    }
 
-        @Override
-        public LuaValue query() {
-            return LuaNumber.valueOf(getHandle().getData());
-        }
+    @LinkedFieldMutatorDefinition("data")
+    public void setData(LuaInteger data) {
+        getHandle().setData((byte) data.checkint());
+    }
+
+    @LinkedFieldAccessorDefinition("data")
+    public LuaInteger getData() {
+        return LuaNumber.valueOf(getHandle().getData());
     }
 }

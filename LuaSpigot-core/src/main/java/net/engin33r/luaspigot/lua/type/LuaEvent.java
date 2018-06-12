@@ -2,8 +2,6 @@ package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.TypeUtils;
 import net.engin33r.luaspigot.lua.WrapperType;
-import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.Method;
 import net.engin33r.luaspigot.lua.type.event.*;
 import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import org.bukkit.event.Cancellable;

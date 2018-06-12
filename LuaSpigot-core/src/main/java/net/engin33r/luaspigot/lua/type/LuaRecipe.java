@@ -1,9 +1,11 @@
 package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.WrapperType;
-import net.engin33r.luaspigot.lua.LinkedField;
+import net.engin33r.luaspigot.lua.annotation.LinkedFieldAccessorDefinition;
+import net.engin33r.luaspigot.lua.annotation.LinkedFieldMutatorDefinition;
 import org.bukkit.Material;
 import org.bukkit.inventory.*;
+import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -19,7 +21,6 @@ public class LuaRecipe extends WrapperType<Recipe> {
 
     private final String type;
 
-    private final Map<Character, ItemStack> map = new HashMap<>();
     private final String[] strshape = {"", "", ""};
 
     public LuaRecipe(Recipe r) {
@@ -27,7 +28,6 @@ public class LuaRecipe extends WrapperType<Recipe> {
 
         if (r instanceof ShapedRecipe) {
             this.type = "shaped";
-            registerLinkedField("shape", new ShapeField(this));
         } else if (r instanceof ShapelessRecipe) {
             this.type = "shapeless";
         } else if (r instanceof FurnaceRecipe) {
@@ -48,47 +48,46 @@ public class LuaRecipe extends WrapperType<Recipe> {
         return "recipe";
     }
 
-    private class ShapeField extends LinkedField<LuaRecipe> {
-        public ShapeField(LuaRecipe self) { super(self); }
+    @LinkedFieldMutatorDefinition("shape")
+    public void setShape(LuaTable shape) {
+        if (!type.equals("shaped")) {
+            throw new LuaError("cannot set shape of non-shaped recipe");
+        }
+        ShapedRecipe recipe = (ShapedRecipe) getHandle();
+        if (shape.length() == 0) error("recipe shape must have at least" +
+                " 1 item");
 
-        @Override
-        public void update(LuaValue val) {
-            ShapedRecipe recipe = (ShapedRecipe) getHandle();
-            LuaTable shape = val.checktable();
-            if (shape.length() == 0) error("recipe shape must have at least" +
-                    " 1 item");
-
-            for (int i = 1; i <= 9 && i <= shape.length(); i++) {
-                int row = (int) Math.floor(i/3);
-                String str = shape.get(i).tojstring();
-                if (str.equals("") || str.equals(" ")) {
-                    strshape[row] += " ";
-                } else {
-                    recipe.setIngredient(String.valueOf(i)
-                            .charAt(0), Material.valueOf(str));
-                    strshape[row] += String.valueOf(i).charAt(0);
-                }
+        for (int i = 1; i <= 9 && i <= shape.length(); i++) {
+            int row = (int) Math.floor(i/3);
+            String str = shape.get(i).tojstring();
+            if (str.equals("") || str.equals(" ")) {
+                strshape[row] += " ";
+            } else {
+                recipe.setIngredient(String.valueOf(i)
+                        .charAt(0), Material.valueOf(str));
+                strshape[row] += String.valueOf(i).charAt(0);
             }
-
-            recipe.shape(strshape);
         }
 
-        @Override
-        public LuaValue query() {
-            ShapedRecipe recipe = (ShapedRecipe) getHandle();
-            LuaTable shape = LuaTable.tableOf();
+        recipe.shape(strshape);
+    }
 
-            Map<Character, ItemStack> map = recipe.getIngredientMap();
-            for (String row : recipe.getShape()) {
-                for (int i = 0; i < 3; i++) {
-                    if (map.get(row.charAt(i)) != null) {
-                        shape.set(shape.length() + 1, LuaString.valueOf(
-                                map.get(row.charAt(i)).getType().toString()));
-                    }
+    @LinkedFieldAccessorDefinition("shape")
+    public LuaValue getShape() {
+        if (!type.equals("shaped")) {
+            return NIL;
+        }
+        ShapedRecipe recipe = (ShapedRecipe) getHandle();
+        LuaTable shape = LuaTable.tableOf();
+        Map<Character, ItemStack> map = recipe.getIngredientMap();
+        for (String row : recipe.getShape()) {
+            for (int i = 0; i < 3; i++) {
+                if (map.get(row.charAt(i)) != null) {
+                    shape.set(shape.length() + 1, LuaString.valueOf(
+                            map.get(row.charAt(i)).getType().toString()));
                 }
             }
-
-            return shape;
         }
+        return shape;
     }
 }

@@ -1,8 +1,6 @@
 package net.engin33r.luaspigot.lua;
 
-import net.engin33r.luaspigot.lua.annotation.DynamicFieldDefinition;
-import net.engin33r.luaspigot.lua.annotation.MetatableMethodDefinition;
-import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
+import net.engin33r.luaspigot.lua.annotation.*;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -21,9 +19,10 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unused")
 public abstract class WeakType extends LuaTable implements IWeakType {
-    private final Map<LuaValue, net.engin33r.luaspigot.lua.DynamicField>
+    private final Map<LuaValue, DynamicField<? extends WeakType>>
             dynFields = new HashMap<>();
-    private final Map<LuaValue, LinkedField> linkedFields = new HashMap<>();
+    private final Map<LuaValue, LinkedField<? extends WeakType>> linkedFields
+            = new HashMap<>();
 
     protected WeakType() {
         this.set("type", this.getName());
@@ -31,24 +30,86 @@ public abstract class WeakType extends LuaTable implements IWeakType {
 
         final Class<? extends WeakType> clazz = this.getClass();
 
+        for (Class<?> c : clazz.getDeclaredClasses()) {
+            if (c.isAnnotationPresent(LinkedFieldInterfaceDefinition.class)) {
+                try {
+                    // For some reason the constructor also takes the
+                    // enclosing class as an argument
+                    String name = c.getDeclaredAnnotation(
+                            LinkedFieldInterfaceDefinition.class).value();
+                    linkedFields.put(LuaValue.valueOf(name),
+                            (LinkedField<? extends WeakType>) c
+                                    .getConstructor(this.getClass(), this.getClass())
+                                    .newInstance(this, this));
+                } catch (NoSuchMethodException |
+                        IllegalAccessException |
+                        InstantiationException |
+                        InvocationTargetException e) {
+                    //error(e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }
+
         for (java.lang.reflect.Method m : clazz.getDeclaredMethods()) {
-            if (m.isAnnotationPresent(DynamicFieldDefinition.class)) {
-                String name = m.getAnnotation(DynamicFieldDefinition.class)
-                        .value();
-                name = name.equals("") ? m.getName() : name;
-                dynFields.put(LuaValue.valueOf(name), new
-                        DynamicField<WeakType>(this) {
-                    @Override
-                    public LuaValue query() {
-                        try {
-                            return (LuaValue) m.invoke(WeakType.this);
-                        } catch (IllegalAccessException |
-                                InvocationTargetException e) {
-                            //error(e.getMessage());
-                            e.printStackTrace();
+            if (m.isAnnotationPresent(LinkedFieldMutatorDefinition.class)) {
+                LuaValue name = LuaValue.valueOf(m
+                        .getAnnotation(LinkedFieldMutatorDefinition.class)
+                        .value());
+                linkedFields.computeIfAbsent(name,
+                        k -> new LinkedField<>(this));
+                linkedFields.get(name).setMutator((self, arg) -> {
+                    try {
+                        Class<?> argClass = m.getParameterTypes()[0];
+                        LuaValue checked = arg;
+                        if (WeakType.class.isAssignableFrom(argClass)) {
+                            @SuppressWarnings("unchecked")
+                            Class<? extends WeakType> wClass =
+                                    (Class<? extends WeakType>) argClass;
+                            checked = TypeUtils.checkOf(arg, wClass);
                         }
-                        return NIL;
+                        m.invoke(this, checked);
+                    } catch (IllegalAccessException |
+                            InvocationTargetException e) {
+                        //error(e.getMessage());
+                        e.printStackTrace();
                     }
+                });
+            }
+
+            if (m.isAnnotationPresent(LinkedFieldAccessorDefinition.class)) {
+                LuaValue name = LuaValue.valueOf(m
+                        .getAnnotation(LinkedFieldAccessorDefinition.class)
+                        .value());
+                linkedFields.computeIfAbsent(name,
+                        k -> new LinkedField<>(this));
+                linkedFields.get(name).setAccessor(self -> {
+                    try {
+                        return (LuaValue) m.invoke(this);
+                    } catch (IllegalAccessException |
+                            InvocationTargetException e) {
+                        //error(e.getMessage());
+                        e.printStackTrace();
+                    }
+                    return NIL;
+                });
+            }
+
+            if (m.isAnnotationPresent(DynamicFieldDefinition.class)) {
+                LuaValue name = LuaValue.valueOf(m
+                        .getAnnotation(DynamicFieldDefinition.class)
+                        .value());
+                dynFields.computeIfAbsent(name,
+                        k -> new DynamicField<>(this));
+                dynFields.get(name).setAccessor(self -> {
+                    try {
+                        return (LuaValue) m.invoke(this);
+                    } catch (IllegalAccessException |
+                            InvocationTargetException e) {
+                        //error(e.getMessage());
+                        e.printStackTrace();
+                    }
+                    return NIL;
                 });
             }
 
@@ -94,7 +155,7 @@ public abstract class WeakType extends LuaTable implements IWeakType {
     @Override
     public void set(LuaValue key, LuaValue value) {
         if (linkedFields.get(key) != null) {
-            linkedFields.get(key).update(value);
+            linkedFields.get(key).mutate(value);
             return;
         }
         super.set(key, value);
@@ -104,8 +165,10 @@ public abstract class WeakType extends LuaTable implements IWeakType {
     public LuaValue get(LuaValue key) {
         LuaValue i = index(key);
         if (i != null) return i;
-        if (dynFields.get(key) != null) return dynFields.get(key).query();
-        if (linkedFields.get(key) != null) return linkedFields.get(key).query();
+        if (dynFields.get(key) != null)
+            return dynFields.get(key).access();
+        if (linkedFields.get(key) != null)
+            return linkedFields.get(key).access();
         return super.get(key);
     }
 
@@ -173,21 +236,19 @@ public abstract class WeakType extends LuaTable implements IWeakType {
         this.set(key, field == null ? NIL : field);
     }
 
-    public void registerDynamicField(String name, DynamicField field) {
+    public void registerDynamicField(String name,
+                                     DynamicField<? extends WeakType> field) {
         registerDynamicField(LuaValue.valueOf(name), field);
     }
 
     public void registerDynamicField(String name, Supplier<LuaValue> query) {
-        registerDynamicField(LuaValue.valueOf(name), new
-                DynamicField<WeakType>(this) {
-            @Override
-            public LuaValue query() {
-                return query.get();
-            }
-        });
+        DynamicField<? extends WeakType> field = new DynamicField<>(this);
+        field.setAccessor(self -> query.get());
+        registerDynamicField(name, field);
     }
 
-    public void registerDynamicField(LuaValue key, DynamicField field) {
+    public void registerDynamicField(LuaValue key,
+                                     DynamicField<? extends WeakType> field) {
         dynFields.put(key, field);
     }
 
@@ -195,27 +256,30 @@ public abstract class WeakType extends LuaTable implements IWeakType {
         getMetatable().set(name, metamethod.getFunction());
     }
 
-    public void registerLinkedField(String name, LinkedField field) {
+    public void registerLinkedField(String name,
+                                    LinkedField<? extends WeakType> field) {
         registerLinkedField(LuaValue.valueOf(name), field);
+    }
+
+    public void registerLinkedField(String name,
+                                    Accessor<WeakType, LuaValue> accessor,
+                                    Mutator<WeakType, LuaValue> mutator) {
+        LinkedField<WeakType> field = new LinkedField<>(this);
+        field.setAccessor(accessor);
+        field.setMutator(mutator);
+        registerLinkedField(name, field);
     }
 
     public void registerLinkedField(String name, Consumer<LuaValue> update,
                                     Supplier<LuaValue> query) {
-        registerLinkedField(LuaValue.valueOf(name), new LinkedField<WeakType>
-                () {
-            @Override
-            public void update(LuaValue val) {
-                update.accept(val);
-            }
-
-            @Override
-            public LuaValue query() {
-                return query.get();
-            }
-        });
+        LinkedField<? extends WeakType> field = new LinkedField<>(this);
+        field.setAccessor(self -> query.get());
+        field.setMutator((self, arg) -> update.accept(arg));
+        registerLinkedField(name, field);
     }
 
-    public void registerLinkedField(LuaValue key, LinkedField field) {
+    public void registerLinkedField(LuaValue key,
+                                    LinkedField<? extends WeakType> field) {
         linkedFields.put(key, field);
     }
 }

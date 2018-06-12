@@ -1,8 +1,10 @@
 package net.engin33r.luaspigot.lua.type;
 
 import net.engin33r.luaspigot.lua.TableUtils;
+import net.engin33r.luaspigot.lua.TypeUtils;
 import net.engin33r.luaspigot.lua.WrapperType;
-import net.engin33r.luaspigot.lua.LinkedField;
+import net.engin33r.luaspigot.lua.annotation.LinkedFieldAccessorDefinition;
+import net.engin33r.luaspigot.lua.annotation.LinkedFieldMutatorDefinition;
 import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -73,9 +75,6 @@ public class LuaItem extends WrapperType<ItemStack> {
     public LuaItem(ItemStack item) {
         super(item);
 
-        registerLinkedField("material", new MaterialField());
-        registerLinkedField("durability", new DurabilityField());
-        registerLinkedField("amount", new AmountField());
         registerField("meta", new LuaItemMeta(item, item.getItemMeta()));
     }
 
@@ -97,41 +96,35 @@ public class LuaItem extends WrapperType<ItemStack> {
         return "item";
     }
 
-    private class MaterialField extends LinkedField<LuaItem> {
-        @Override
-        public void update(LuaValue val) {
-            getHandle().setType(Material.getMaterial(val.checkjstring()));
-        }
-
-        @Override
-        public LuaValue query() {
-            ItemStack item = getHandle();
-            return (item == null || item.getType() == null) ? NIL :
-                    LuaString.valueOf(item.getType().toString());
-        }
+    @LinkedFieldMutatorDefinition("material")
+    public void setType(LuaValue val) {
+        getHandle().setType(TypeUtils.getEnum(val, Material.class));
     }
 
-    private class DurabilityField extends LinkedField<LuaItem> {
-        @Override
-        public void update(LuaValue val) {
-            getHandle().setDurability(val.checknumber().toshort());
-        }
-
-        @Override
-        public LuaValue query() {
-            return LuaNumber.valueOf(getHandle().getDurability());
-        }
+    @LinkedFieldAccessorDefinition("material")
+    public LuaValue getType() {
+        ItemStack item = getHandle();
+        return (item == null || item.getType() == null) ? NIL :
+                LuaString.valueOf(item.getType().toString());
     }
 
-    private class AmountField extends LinkedField<LuaItem> {
-        @Override
-        public void update(LuaValue val) {
-            getHandle().setAmount(val.checkint());
-        }
+    @LinkedFieldMutatorDefinition("durability")
+    public void setDurability(LuaValue val) {
+        getHandle().setDurability(val.checknumber().toshort());
+    }
 
-        @Override
-        public LuaValue query() {
-            return LuaNumber.valueOf(getHandle().getAmount());
-        }
+    @LinkedFieldAccessorDefinition("durability")
+    public LuaValue getDurability() {
+        return LuaNumber.valueOf(getHandle().getDurability());
+    }
+
+    @LinkedFieldMutatorDefinition("amount")
+    public void setAmount(LuaValue val) {
+        getHandle().setAmount(val.checkint());
+    }
+
+    @LinkedFieldAccessorDefinition("amount")
+    public LuaValue getAmount() {
+        return LuaNumber.valueOf(getHandle().getAmount());
     }
 }

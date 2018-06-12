@@ -4,6 +4,8 @@ import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.TypeUtils;
 import net.engin33r.luaspigot.lua.annotation.DynamicFieldDefinition;
+import net.engin33r.luaspigot.lua.annotation.LinkedFieldAccessorDefinition;
+import net.engin33r.luaspigot.lua.annotation.LinkedFieldMutatorDefinition;
 import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.Bukkit;
@@ -22,9 +24,6 @@ public class LuaEntity extends WrapperType<Entity> {
 
     public LuaEntity(Entity entity) {
         super(entity);
-
-        registerLinkedField("location", new LocationField());
-        registerLinkedField("velocity", new VelocityField());
     }
 
     @Override
@@ -67,36 +66,24 @@ public class LuaEntity extends WrapperType<Entity> {
         return NIL;
     }
 
-    private class LocationField extends LinkedField<LuaEntity> {
-        @Override
-        public void update(LuaValue val) {
-            TypeUtils.validate(val.checktable(), "location");
-            getHandle().teleport(((LuaLocation) val.checktable()).getHandle());
-        }
-
-        @Override
-        public LuaValue query() {
-            return new LuaLocation(getHandle().getLocation());
-        }
+    @LinkedFieldMutatorDefinition("location")
+    public void setLocation(LuaLocation location) {
+        getHandle().teleport(location.getHandle());
     }
 
-    private class VelocityField extends LinkedField<LuaEntity> {
-        @Override
-        public void update(LuaValue val) {
-            LuaVector vec;
-            LuaTable tbl = val.checktable();
-            if (tbl.get("type").optjstring("").equals("vector"))
-                vec = (LuaVector) tbl;
-            else
-                vec = new LuaVector(tbl.get(1).checkdouble(),
-                        tbl.get(2).checkdouble(), tbl.get(3).checkdouble());
-            getHandle().setVelocity(vec.getVector());
-        }
+    @LinkedFieldAccessorDefinition("location")
+    public LuaLocation getLocation() {
+        return new LuaLocation(getHandle().getLocation());
+    }
 
-        @Override
-        public LuaValue query() {
-            return new LuaVector(getHandle().getVelocity());
-        }
+    @LinkedFieldMutatorDefinition("velocity")
+    public void setVelocity(LuaVector velocity) {
+        getHandle().setVelocity(velocity.getHandle());
+    }
+
+    @LinkedFieldAccessorDefinition("velocity")
+    public LuaVector getVelocity() {
+        return new LuaVector(getHandle().getVelocity());
     }
 
     @Override

@@ -4,10 +4,11 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.DespawnReason;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
-import net.engin33r.luaspigot.lua.LinkedField;
 import net.engin33r.luaspigot.lua.TableUtils;
 import net.engin33r.luaspigot.lua.WrapperType;
 import net.engin33r.luaspigot.lua.annotation.DynamicFieldDefinition;
+import net.engin33r.luaspigot.lua.annotation.LinkedFieldAccessorDefinition;
+import net.engin33r.luaspigot.lua.annotation.LinkedFieldMutatorDefinition;
 import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
 import net.engin33r.luaspigot.lua.type.LuaEntity;
 import net.engin33r.luaspigot.lua.type.LuaLocation;
@@ -30,9 +31,6 @@ public class LuaNPC extends WrapperType<NPC> {
 
         registerField("uuid", new LuaUUID(npc.getUniqueId()));
         registerField("fullName", LuaString.valueOf(npc.getFullName()));
-        registerLinkedField("value", new NameField(this));
-        registerLinkedField("flyable", new FlyableField(this));
-        registerLinkedField("protected", new ProtectedField(this));
     }
 
     @SuppressWarnings("unused")
@@ -157,51 +155,33 @@ public class LuaNPC extends WrapperType<NPC> {
         return NIL;
     }
 
-    private class NameField extends LinkedField<LuaNPC> {
-        NameField(LuaNPC self) {
-            super(self);
-        }
-
-        @Override
-        public void update(LuaValue val) {
-            getHandle().setName(val.tojstring());
-        }
-
-        @Override
-        public LuaValue query() {
-            return LuaString.valueOf(getHandle().getName());
-        }
+    @LinkedFieldMutatorDefinition("name")
+    public void setNpcName(LuaValue name) {
+        getHandle().setName(name.checkjstring());
     }
 
-    private class FlyableField extends LinkedField<LuaNPC> {
-        FlyableField(LuaNPC self) {
-            super(self);
-        }
-
-        @Override
-        public void update(LuaValue val) {
-            getHandle().setFlyable(val.checkboolean());
-        }
-
-        @Override
-        public LuaValue query() {
-            return LuaBoolean.valueOf(getHandle().isFlyable());
-        }
+    @LinkedFieldAccessorDefinition("name")
+    public LuaValue getNpcName() {
+        return LuaString.valueOf(getHandle().getName());
     }
 
-    private class ProtectedField extends LinkedField<LuaNPC> {
-        ProtectedField(LuaNPC self) {
-            super(self);
-        }
+    @LinkedFieldMutatorDefinition("flyable")
+    public void setFlyable(LuaValue flyable) {
+        getHandle().setFlyable(flyable.checkboolean());
+    }
 
-        @Override
-        public void update(LuaValue val) {
-            getHandle().setProtected(val.checkboolean());
-        }
+    @LinkedFieldAccessorDefinition("flyable")
+    public LuaValue isFlyable() {
+        return LuaBoolean.valueOf(getHandle().isFlyable());
+    }
 
-        @Override
-        public LuaValue query() {
-            return LuaBoolean.valueOf(getHandle().isProtected());
-        }
+    @LinkedFieldMutatorDefinition("protected")
+    public void setProtected(LuaValue protect) {
+        getHandle().setProtected(protect.checkboolean());
+    }
+
+    @LinkedFieldAccessorDefinition("protected")
+    public LuaValue isProtected() {
+        return LuaBoolean.valueOf(getHandle().isProtected());
     }
 }

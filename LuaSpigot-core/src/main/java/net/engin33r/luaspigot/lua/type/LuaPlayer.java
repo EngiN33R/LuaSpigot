@@ -1,10 +1,8 @@
 package net.engin33r.luaspigot.lua.type;
 
-import net.engin33r.luaspigot.lua.WrapperType;
-import net.engin33r.luaspigot.lua.LinkedField;
-import net.engin33r.luaspigot.lua.TypeUtils;
-import net.engin33r.luaspigot.lua.annotation.DynamicFieldDefinition;
-import net.engin33r.luaspigot.lua.annotation.MethodDefinition;
+import lombok.Getter;
+import net.engin33r.luaspigot.lua.*;
+import net.engin33r.luaspigot.lua.annotation.*;
 import net.engin33r.luaspigot.lua.type.util.LuaUUID;
 import net.engin33r.luaspigot.lua.type.util.LuaVector;
 import org.bukkit.Bukkit;
@@ -22,20 +20,11 @@ import org.luaj.vm2.Varargs;
 public class LuaPlayer extends WrapperType<OfflinePlayer> {
     private static final LuaValue typeMetatable = LuaValue.tableOf();
 
-    private LuaInventory inv;
-
     public LuaPlayer(OfflinePlayer p) {
         super(p);
 
         registerField("uuid", new LuaUUID(p.getUniqueId()));
         registerField("value", LuaValue.valueOf(p.getName()));
-
-        registerLinkedField("inventory", new InventoryField());
-        registerLinkedField("location", new LocationField());
-        registerLinkedField("velocity", new VelocityField());
-
-        if (p.getPlayer() != null)
-            inv = new LuaInventory(p.getPlayer().getInventory());
     }
 
     public LuaPlayer(Player p) {
@@ -56,12 +45,6 @@ public class LuaPlayer extends WrapperType<OfflinePlayer> {
     @DynamicFieldDefinition("online")
     public LuaValue getOnline() {
         return LuaValue.valueOf(getHandle().isOnline());
-    }
-
-    @DynamicFieldDefinition("location")
-    public LuaValue getLocation() {
-        Player p = getHandle().getPlayer();
-        return p == null ? NIL : new LuaLocation(p.getLocation());
     }
 
     @MethodDefinition("message")
@@ -110,75 +93,32 @@ public class LuaPlayer extends WrapperType<OfflinePlayer> {
         return NIL;
     }
 
-    @DynamicFieldDefinition("inventory")
-    public Varargs inventory() {
-        Player p = getHandle().getPlayer();
-        if (p == null) return NIL;
-
-        return new LuaInventory(p.getInventory());
+    @LinkedFieldMutatorDefinition("location")
+    public void setLocation(LuaLocation location) {
+        Player pl = getHandle().getPlayer();
+        if (pl != null) pl.teleport(location.getHandle());
     }
 
-    private class LocationField extends LinkedField<LuaPlayer> {
-        @Override
-        public void update(LuaValue val) {
-            Player pp = getHandle().getPlayer();
-            if (pp == null) return;
-
-            LuaTable tbl = val.checktable(1);
-            TypeUtils.validate(tbl, "location");
-            pp.teleport(((LuaLocation) tbl).getHandle());
-        }
-
-        @Override
-        public LuaValue query() {
-            return null;
-        }
+    @LinkedFieldAccessorDefinition("location")
+    public LuaValue getLocation() {
+        Player pl = getHandle().getPlayer();
+        if (pl != null)
+            return new LuaLocation(pl.getLocation());
+        return NIL;
     }
 
-    private class InventoryField extends LinkedField<LuaPlayer> {
-        @Override
-        public void update(LuaValue val) {
-            Player p = getHandle().getPlayer();
-            if (p == null) return;
-
-            TypeUtils.validate(val.checktable(), "inventory");
-            p.getInventory().setContents(
-                    TypeUtils.checkOf(val, LuaInventory.class)
-                            .getContents());
-        }
-
-        @Override
-        public LuaValue query() {
-            Player p = getHandle().getPlayer();
-            if (p == null) return NIL;
-
-            if (!inv.getHandle().equals(p.getInventory()))
-                inv = new LuaInventory(p.getInventory());
-
-            return inv;
-        }
+    @LinkedFieldMutatorDefinition("inventory")
+    public void setInventory(LuaInventory inv) {
+        Player pl = getHandle().getPlayer();
+        if (pl != null) pl.getInventory().setContents(inv.getContents());
     }
 
-    private class VelocityField extends LinkedField<LuaEntity> {
-        @Override
-        public void update(LuaValue val) {
-            if (getHandle().getPlayer() == null) return;
-
-            LuaVector vec;
-            LuaTable tbl = val.checktable();
-            if (tbl.get("type").optjstring("").equals("vector"))
-                vec = (LuaVector) tbl;
-            else
-                vec = new LuaVector(tbl.get(1).checkdouble(),
-                        tbl.get(2).checkdouble(), tbl.get(3).checkdouble());
-            getHandle().getPlayer().setVelocity(vec.getVector());
-        }
-
-        @Override
-        public LuaValue query() {
-            if (getHandle().getPlayer() == null) return NIL;
-            return new LuaVector(getHandle().getPlayer().getVelocity());
-        }
+    @LinkedFieldAccessorDefinition("inventory")
+    public LuaValue getInventory() {
+        Player pl = getHandle().getPlayer();
+        if (pl != null)
+            return new LuaInventory(pl.getInventory());
+        return NIL;
     }
 
     @Override
